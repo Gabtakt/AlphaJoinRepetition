@@ -141,7 +141,7 @@ def getQueryEncode(attrNames):
                             # 2021-3-24 : change one-hot to histogram
                             predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
                             # predicatesEncode[attr_to_int[word]] = 1
-            else if ">" in temp:
+            elif ">" in temp:
                 index = temp.index(">")
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
@@ -156,7 +156,7 @@ def getQueryEncode(attrNames):
                         # 2021-3-24 : change one-hot to histogram
                         predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
 
-            else if "<" in temp:
+            elif "<" in temp:
                 index = temp.index("<")
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
@@ -171,7 +171,7 @@ def getQueryEncode(attrNames):
                         # 2021-3-24 : change one-hot to histogram
                         predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
 
-            else if ">=" in temp:
+            elif ">=" in temp:
                 index = temp.index(">=")
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
@@ -186,7 +186,7 @@ def getQueryEncode(attrNames):
                         # 2021-3-24 : change one-hot to histogram
                         predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
 
-            else if "<=" in temp:
+            elif "<=" in temp:
                 index = temp.index("<=")
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
