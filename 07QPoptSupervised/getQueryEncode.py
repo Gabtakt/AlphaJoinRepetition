@@ -2,6 +2,7 @@
 
 import os
 from getResource import getResource
+import psycopg2
 
 # 数据库连接参数
 conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
