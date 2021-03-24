@@ -215,10 +215,10 @@ def getQueryEncode(attrNames):
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
         queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
 
-    for i in queryEncodeDict.items():
-        print(i)
-    print(len(tableNames), tableNames)
-    print(len(attrNames), attrNames)
+    # for i in queryEncodeDict.items():
+    #     print(i)
+    # print(len(tableNames), tableNames)
+    # print(len(attrNames), attrNames)
 
     f = open(predicatesEncodeDictpath, 'w')
     f.write(str(predicatesEncodeDict))
