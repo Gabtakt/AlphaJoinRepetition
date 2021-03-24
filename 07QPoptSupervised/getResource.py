@@ -18,7 +18,7 @@ nametocostpath = "../resource/nametocost"
 
 
 def getResource():
-    conn = psycopg2.connect(database="imdb2013", user="wk", password="wwww", host="localhost", port="5432")
+    conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
     cur = conn.cursor()
 
     # 全名到缩写的映射

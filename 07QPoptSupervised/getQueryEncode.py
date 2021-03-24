@@ -4,8 +4,9 @@ import os
 from getResource import getResource
 
 # 数据库连接参数
-# conn = psycopg2.connect(database="imdb2017", user="ohlala", password="wwww", host="localhost", port="5432")
-# cur = conn.cursor()
+conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
+cur = conn.cursor()
+
 querydir = '../resource/jobquery'   # imdb的113条查询语句
 tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名（缩写）
 queryplandir = '../resource/jobqueryplan'     # imdb的113条查询语句和其对应的查询计划
@@ -132,8 +133,10 @@ def getQueryEncode(attrNames):
                                 word = word[1:]
                             if word[-1] == ';':
                                 word = word[:-1]
-                            predicatesEncode[attr_to_int[word]] = 1
-            else:
+                            # 2021-3-24 : change one-hot to histogram
+                            predicatesEncode[attr_to_int[word]] = getAttributionProportion(word)
+                            # predicatesEncode[attr_to_int[word]] = 1
+            else:q
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
@@ -166,6 +169,15 @@ def filter(word):
         if word[-1] == ';':
             word = word[:-1]
     return word
+
+def getAttributionProportion(tablename, attname):
+    sql = "select histogram_bounds from pg_stats where tablename = '%s' and attname = '%s';" % (tablename, attname)
+    cur.execute(sql)
+    rs=cur.fetchall()
+    for line in rs:
+        print(line)
+    return 1
+
 
 
 if __name__ == '__main__':
