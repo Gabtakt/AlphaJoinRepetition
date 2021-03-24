@@ -115,6 +115,7 @@ def getQueryEncode(attrNames):
 
             if "=" in temp:
                 index = temp.index("=")
+                # 等值连接
                 if (filter(temp[index - 1]) in attrNames) & (filter(temp[index + 1]) in attrNames):
                     table1 = temp[index - 1].split('.')[0]
                     table2 = temp[index + 1].split('.')[0]
@@ -125,6 +126,7 @@ def getQueryEncode(attrNames):
                     #     for j in range(0, len(tableNames)):
                     #         print(joinEncode[i*len(tableNames)+j],end=' ')
                     #     print()
+                # 谓词上的'='选择过滤
                 else:
                     table = temp[index - 1].split('.')[0]
                     tablename = short_to_long[table]
@@ -140,6 +142,7 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
                             # predicatesEncode[attr_to_int[word]] = 1
             else:
+                print(temp)
                 index = temp.index(".")
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
