@@ -55,6 +55,7 @@ def getResource():
         # 将原始表名顺序转存到对应queryName文件中，更新tablename
         for i in range(j, k - 1):
             temp = file_context[i].split()
+            print(temp[temp.index("AS") + 1][:-1])
             tablenames.append(temp[temp.index("AS") + 1][:-1].lower())
         temp = file_context[k - 1].split()
         tablenames.append(temp[temp.index("AS") + 1].lower())
