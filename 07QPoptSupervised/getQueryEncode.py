@@ -237,6 +237,8 @@ def filter(word):
     return word
 
 def getAttributionProportion(tablename, attname):
+    print(tablename)
+    print(attname)
     sql = "select histogram_bounds from pg_stats where tablename = '%s' and attname = '%s';" % (tablename, attname)
     cur.execute(sql)
     rs=cur.fetchall()
