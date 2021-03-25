@@ -201,7 +201,6 @@ def getQueryEncode(attrNames):
                         # 2021-3-24 : change one-hot to histogram
                         predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
 
-
             else:
                 for word in temp:
                     if '.' in word:
@@ -242,8 +241,9 @@ def getAttributionProportion(tablename, attname):
     sql = "select histogram_bounds from pg_stats where tablename = '%s' and attname = '%s';" % (tablename, attname.split('.')[1])
     cur.execute(sql)
     rs=cur.fetchall()
-    for line in rs:
-        print(line)
+    # FIXME: 还未计算比例(仅对数值型数据计算？)
+    # for line in rs:
+    #     print(line)
     return 1
 
 
