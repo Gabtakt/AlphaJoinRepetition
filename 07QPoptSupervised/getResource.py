@@ -87,10 +87,10 @@ def getResource():
         # 查询计划第一行的形式: Aggregate  (cost=19531.49..19531.50 rows=1 width=68)
         origin_cost = rows[0][0].split("=")[1]
         origin_cost = origin_cost.split("..")[0]
+        print(origin_cost + " / " + queryName)
         origin_cost = float(origin_cost)
         name = queryName[0:-4]
         name_to_cost[name] = origin_cost
-        print(origin_cost)
 
         # 将原始的查询计划直接表示为pghint可以接受的括号形式,存入lableDect
         lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
