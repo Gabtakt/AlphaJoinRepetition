@@ -85,9 +85,6 @@ def getQueryAttributions():
 # 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
 
-    # 初始化连接矩阵和谓词向量
-    joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
-    predicatesEncode = [0 for _ in range(len(attrNames))]
 
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
@@ -118,8 +115,13 @@ def getQueryEncode(attrNames):
     fileList = os.listdir(querydir)
     fileList.sort()
 
+
     for queryName in fileList:
 
+        # 初始化连接矩阵和谓词向量
+        joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
+        predicatesEncode = [0 for _ in range(len(attrNames))]
+        
         # 读取query语句
         querypath = querydir + "/" + queryName
         file_object = open(querypath)
