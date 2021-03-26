@@ -3,6 +3,7 @@
 import os
 from getResource import getResource
 import psycopg2
+from enum import Enum
 
 querydir = '../resource/jobquery'   # imdb的113条查询语句
 tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名（缩写）
@@ -12,12 +13,39 @@ shorttolongpath = '../resource/shorttolong'   # 表的缩写到全名的映射�
 predicatesEncodeDictpath = './predicatesEncodedDict'   # 谓词的编码
 queryEncodeDictpath = './queryEncodedDict'   # 查询语句的编码
 
+# 所有常见谓词的枚举类，用于获取属性列选择率时传入参数以区分操作
+class Predicate(Enum):
+    EQ = 1
+    NEQ = 2
+    BG = 3
+    BGE = 4
+    L = 5
+    LE = 6
+    LIKE = 7
+    NOT_LIKE = 8
+    IS_NULL = 9
+    IS_NOT_NULL = 10
+    BETWEEN = 11
+    NOT_BETWEEN = 12
+    IN = 13
+
+
+# 编码为连接矩阵+谓词向量
+queryEncodeDict = {}
+joinEncodeDict = {}
+predicatesEncodeDict = {}
+
+
+# 初始化连接矩阵和谓词向量
+joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
+predicatesEncode = [0 for _ in range(len(attrNames))]
 
 # 数据库连接参数
 print("connecting...")
 conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
 cur = conn.cursor()
 print("connect success")
+
 
 # 得到所有的attribution，用于进行选择过滤向量
 def getQueryAttributions():
@@ -57,6 +85,10 @@ def getQueryAttributions():
 # 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
 
+    # 初始化连接矩阵和谓词向量
+    joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
+    predicatesEncode = [0 for _ in range(len(attrNames))]
+
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
     a = f.read()
@@ -83,17 +115,10 @@ def getQueryEncode(attrNames):
         int_to_attr[i] = attrNames[i]
         attr_to_int[attrNames[i]] = i
 
-    # 编码为连接矩阵+谓词向量
-    queryEncodeDict = {}
-    joinEncodeDict = {}
-    predicatesEncodeDict = {}
     fileList = os.listdir(querydir)
     fileList.sort()
 
     for queryName in fileList:
-        # 初始化连接矩阵和谓词向量
-        joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
-        predicatesEncode = [0 for _ in range(len(attrNames))]
 
         # 读取query语句
         querypath = querydir + "/" + queryName
@@ -126,92 +151,103 @@ def getQueryEncode(attrNames):
 
                 # 选择过滤: '=' 谓词后为具体数据
                 else:
+                    paramlist = []
                     table = temp[index - 1].split('.')[0]
                     tablename = short_to_long[table]
+                    # 获取过滤阈值
+                    paramlist.append(temp[index + 1])
                     for word in temp:
                         if '.' in word:
                             if word[0] == "'":
                                 continue
                             word = filter(word)
-                            predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
+                            predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
 
-            # 处理 '>'谓词
-            elif ">" in temp:
-                index = temp.index(">")
+            # 处理 '!=' 谓词
+            elif "!=" in temp:
+                index = temp.index("!=")
+                paramlist = []
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
+                # 获取过滤阈值
+                paramlist.append(temp[index + 1])
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
+                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
+
+            # 处理 '>'谓词
+            elif ">" in temp:
+                index = temp.index(">")
+                paramlist = []
+                table = temp[index - 1].split('.')[0]
+                tablename = short_to_long[table]
+                # 获取过滤阈值
+                paramlist.append(temp[index + 1])
+                for word in temp:
+                    if '.' in word:
+                        if word[0] == "'":
+                            continue
+                        word = filter(word)
+                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
 
             # 处理 '<'谓词
             elif "<" in temp:
                 index = temp.index("<")
+                paramlist = []
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
+                # 获取过滤阈值
+                paramlist.append(temp[index + 1])
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
-                        if word[0] == '(':
-                            word = word[1:]
-                        if word[-1] == ';':
-                            word = word[:-1]
-                        # 2021-3-24 : change one-hot to histogram
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
+                        word = filter(word)
+                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
 
             # 处理 '>='谓词
             elif ">=" in temp:
                 index = temp.index(">=")
+                paramlist = []
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
+                # 获取过滤阈值
+                paramlist.append(temp[index + 1])
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
-                        if word[0] == '(':
-                            word = word[1:]
-                        if word[-1] == ';':
-                            word = word[:-1]
-                        # 2021-3-24 : change one-hot to histogram
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
+                        word = filter(word)
+                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
 
             # 处理 '<='谓词
             elif "<=" in temp:
                 index = temp.index("<=")
+                paramlist = []
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
+                # 获取过滤阈值
+                paramlist.append(temp[index + 1])
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
-                        if word[0] == '(':
-                            word = word[1:]
-                        if word[-1] == ';':
-                            word = word[:-1]
-                        # 2021-3-24 : change one-hot to histogram
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word)
+                        word = filter(word)
+                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
 
             else:
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
-                        if word[0] == '(':
-                            word = word[1:]
-                        if word[-1] == ';':
-                            word = word[:-1]
+                        word = filter(word)
                         predicatesEncode[attr_to_int[word]] = 1
+
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
         queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
-
-    # for i in queryEncodeDict.items():
-    #     print(i)
-    # print(len(tableNames), tableNames)
-    # print(len(attrNames), attrNames)
 
     f = open(predicatesEncodeDictpath, 'w')
     f.write(str(predicatesEncodeDict))
@@ -230,7 +266,6 @@ def getQueryEncode(attrNames):
 # 处理属性列，将(A.a1... 或 A.a1; 处理为A.a1
 def filter(word):
 
-
     # 剪切掉左括号符号（不会出现含右括号的情况）
     if word[0] == '(':
         word = word[1:]
@@ -241,13 +276,27 @@ def filter(word):
     return word
 
 
-def getAttributionProportion(tablename, attname):
-    sql = "select histogram_bounds from pg_stats where tablename = '%s' and attname = '%s';" % (tablename, attname.split('.')[1])
+def getAttributionProportion(tablename, attname, predicate, paramlist):
+
+    sql = 
+    """
+    SELECT null_frac,
+           n_distinct,
+           most_common_vals,
+           most_common_freqs,
+           hitogram_bounds
+    FROM pg_stats 
+    WHERE tablename = '%s' and attname = '%s';
+    """ % (tablename, attname)
+    
     cur.execute(sql)
-    rs=cur.fetchall()
-    # FIXME: 还未计算比例(仅对数值型数据计算？)
-    # for line in rs:
-    #     print(line)
+    rows = cur.fetchall()
+    print(len(rows))
+
+    selectivity = 0.0
+
+
+
     return 1
 
 
