@@ -279,7 +279,7 @@ def filter(word):
 def getAttributionProportion(tablename, attname, predicate, paramlist):
 
     sql = 
-    """
+    '''
     SELECT null_frac,
            n_distinct,
            most_common_vals,
@@ -287,7 +287,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
            hitogram_bounds
     FROM pg_stats 
     WHERE tablename = '%s' and attname = '%s';
-    """ % (tablename, attname)
+    ''' % (tablename, attname)
     
     cur.execute(sql)
     rows = cur.fetchall()
