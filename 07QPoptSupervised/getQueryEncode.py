@@ -278,8 +278,7 @@ def filter(word):
 
 def getAttributionProportion(tablename, attname, predicate, paramlist):
 
-    sql = 
-    '''
+    sql = '''
     SELECT null_frac,
            n_distinct,
            most_common_vals,
