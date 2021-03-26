@@ -292,7 +292,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     
     cur.execute(sql)
     rows = cur.fetchall()
-    print(tablename + "," + attname + "," + " " + len(rows))
+    if len(rows) == 0 :
+        print(tablename + "," + attname + "," + " " + len(rows))
 
     selectivity = 0.0
 
