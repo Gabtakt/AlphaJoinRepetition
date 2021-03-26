@@ -127,6 +127,8 @@ def getResource():
     cur.close()
     conn.close()
 
+    print("done")
+
 
 def getHint(queryplan, begin, end):
     if queryplan[begin].find('Scan') != -1 & queryplan[begin].find('Bitmap Index') == -1:

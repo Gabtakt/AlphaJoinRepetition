@@ -4,18 +4,13 @@ import os
 from getResource import getResource
 import psycopg2
 
-# 数据库连接参数
-conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
-cur = conn.cursor()
-
 querydir = '../resource/jobquery'   # imdb的113条查询语句
 tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名（缩写）
 queryplandir = '../resource/jobqueryplan'     # imdb的113条查询语句和其对应的查询计划
 longtoshortpath = '../resource/longtoshort'   # 表的全名到缩写的映射，共21个（有些被覆盖了）
-shorttolongpath = '../resource/shorttolong'   # 表的缩写到全名的映射，共39个
-
-predicatesEncodeDictpath = './predicatesEncodedDict'   # 查询的编码
-queryEncodeDictpath = './queryEncodedDict'   # 查询的编码
+shorttolongpath = '../resource/shorttolong'   # 表的缩写到全名的映射，共28个
+predicatesEncodeDictpath = './predicatesEncodedDict'   # 谓词的编码
+queryEncodeDictpath = './queryEncodedDict'   # 查询语句的编码
 
 # 得到所有的attribution，用于进行选择过滤向量
 def getQueryAttributions():
@@ -29,22 +24,25 @@ def getQueryAttributions():
         file_context = file_object.readlines()
         file_object.close()
 
-        # 找到WHERE在哪里
+        # k记录WHERE的下标
         k = -1
         for i in range(len(file_context)):
             k = k + 1
             if file_context[i].find("WHERE") != -1:
                 break
 
-        # 处理WHERE后面某句话
+        # 处理WHERE后面的筛选条件，获取attribution
         for i in range(k, len(file_context)):
             temp = file_context[i].split()
             for word in temp:
                 if '.' in word:
+                    # word是字符串，不是attribution，不处理
                     if word[0] == "'":
                         continue
+                    # 剪切掉左括号符号（不会出现含右括号的情况）
                     if word[0] == '(':
                         word = word[1:]
+                    # 剪切掉分号（sql语句末尾）
                     if word[-1] == ';':
                         word = word[:-1]
                     attr.add(word)
@@ -54,12 +52,18 @@ def getQueryAttributions():
     return attrNames
 
 
-# 得到了所有的attribution，接下来可以做one-hot编码
+# 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
+    # 数据库连接参数
+    print("connecting...")
+    conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
+    cur = conn.cursor()
+    print("connect success")
 
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
     a = f.read()
+    print(eval(a))
     short_to_long = eval(a)
     f.close()
     tableNames = []
@@ -225,6 +229,11 @@ def getQueryEncode(attrNames):
     f = open(queryEncodeDictpath, 'w')
     f.write(str(queryEncodeDict))
     f.close()
+
+    cur.close()
+    conn.close()
+
+    print("done")
 
 
 def filter(word):
