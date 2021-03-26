@@ -121,7 +121,7 @@ def getQueryEncode(attrNames):
         # 初始化连接矩阵和谓词向量
         joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
         predicatesEncode = [0 for _ in range(len(attrNames))]
-        
+
         # 读取query语句
         querypath = querydir + "/" + queryName
         file_object = open(querypath)
@@ -285,14 +285,14 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
            n_distinct,
            most_common_vals,
            most_common_freqs,
-           hitogram_bounds
+           histogram_bounds
     FROM pg_stats 
     WHERE tablename = '%s' and attname = '%s';
     ''' % (tablename, attname)
     
     cur.execute(sql)
     rows = cur.fetchall()
-    print(len(rows))
+    print(tablename + "," + attname + "," + " " + len(rows))
 
     selectivity = 0.0
 
