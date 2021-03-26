@@ -292,8 +292,15 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     
     cur.execute(sql)
     rows = cur.fetchall()
-    if len(rows) == 0 :
-        print(tablename + "," + attname + "," + " " + str(len(rows)))
+
+    for row in rows:
+        null_frac = row[0]
+        n_distinct = row[1]
+        most_common_vals = row[2]
+        most_common_freqs = row[3]
+        histogram_bounds = row[4]
+        print(null_frac,n_distinct,most_common_vals,most_common_freqs,histogram_bounds)
+
 
     selectivity = 0.0
 
