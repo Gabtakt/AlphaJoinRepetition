@@ -11,15 +11,16 @@ queryplandir = '../resource/jobqueryplan'  # imdb的113条查询语句和其对�
 longtoshortpath = '../resource/longtoshort'  # 表的全名到缩写的映射，共21个（有些被覆盖了）
 shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共39个
 nametocostpath = "../resource/nametocost"
-
 # labledir = './joblable'  # 查询语句对应的执行计划的表的顺序，从先连到后连，使用缩写
 # testdir = './jobtest'
 # labledectpath = './lableDect'
 
 
 def getResource():
+    print("connecting...")
     conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
     cur = conn.cursor()
+    print("connect success")
 
     # 全名到缩写的映射
     long_to_short = {}
@@ -87,14 +88,12 @@ def getResource():
         # 查询计划第一行的形式: Aggregate  (cost=19531.49..19531.50 rows=1 width=68)
         origin_cost = rows[0][0].split("=")[1]
         origin_cost = origin_cost.split("..")[0]
-        print(origin_cost + " / " + queryName)
         origin_cost = float(origin_cost)
         name = queryName[0:-4]
         name_to_cost[name] = origin_cost
 
-        # 将原始的查询计划直接表示为pghint可以接受的括号形式,存入lableDect
-        lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
-        # print(queryName, lableDect[queryName[:-4]])
+        # # 将原始的查询计划直接表示为pghint可以接受的括号形式,存入lableDect
+        # lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
 
         # 更新long_to_short和long_to_short
         scan_language = []
@@ -107,8 +106,6 @@ def getResource():
             long_to_short[word[index + 1]] = word[index + 2]
             short_to_long[word[index + 2]] = word[index + 1]
 
-    # print(len(long_to_short))
-    # print(len(short_to_long))
 
     # f = open(nametocostpath, 'w')
     # f.write(str(name_to_cost))
@@ -149,6 +146,7 @@ def getHint(queryplan, begin, end):
                 a = getHint(queryplan, begin + 1, i)
                 b = getHint(queryplan, i, end)
                 return "( " + a + " " + b + " )"
+
     return getHint(queryplan, begin + 1, end)
 
 
@@ -159,24 +157,5 @@ def blank(line):
     return -1
 
 
-def cmp1(a):
-    sum = 0
-    for i in a:
-        if i == ' ':
-            sum += 1
-    return -sum
-
-
-def del_file(path):
-    ls = os.listdir(path)
-    for i in ls:
-        c_path = os.path.join(path, i)
-        if os.path.isdir(c_path):
-            del_file(c_path)
-        else:
-            os.remove(c_path)
-
-
 if __name__ == '__main__':
     getResource()
-    # getLabel()
