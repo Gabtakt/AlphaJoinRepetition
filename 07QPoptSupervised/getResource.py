@@ -32,14 +32,13 @@ def getResource():
     fileList = os.listdir(querydir)
     fileList.sort()
     for queryName in fileList:
-        # queryName = "9d.sql"
         # 处理查询得到表的简写，顺序同查询中的顺序
         querypath = querydir + "/" + queryName
         file_object = open(querypath)
         file_context = file_object.readlines()
-        # print(file_context)
         file_object.close()
 
+        # i和k分别表示FROM子句和WHERE子句在查询语句中的位置
         j = 0
         k = 0
         tablenames = []
@@ -52,9 +51,10 @@ def getResource():
                 break
             k = k + 1
 
-        # 将原始表名顺序转存到对应queryName文件中，更新tablename
+        # 将原始表名缩写顺序转存到对应queryName文件中，更新jobtablename
         for i in range(j, k - 1):
             temp = file_context[i].split()
+            # 这里的切片操作是剪切掉语句中的逗号，最后一个表不用处理
             tablenames.append(temp[temp.index("AS") + 1][:-1].lower())
         temp = file_context[k - 1].split()
         tablenames.append(temp[temp.index("AS") + 1].lower())
@@ -62,7 +62,6 @@ def getResource():
         f = open(tablenamedir + "/" + queryName[:-4], 'w')
         f.write(str(tablenames))
         f.close()
-        # print(queryName, tablenames)
 
         # 读取查询
         querypath = querydir + "/" + queryName
@@ -74,7 +73,7 @@ def getResource():
         cur.execute("explain " + file_context)
         rows = cur.fetchall()  # all rows in table
 
-        # 保存所有的查询和查询计划，更新queryplan
+        # 保存所有的查询和查询计划，更新jobqueryplan
         queryplanpath = queryplandir + "/" + queryName
         file_object = open(queryplanpath, 'w')
         file_object.write(file_context + '\n\n')
@@ -85,15 +84,17 @@ def getResource():
         file_object.close()
 
         # 更新nametocost
+        # 查询计划第一行的形式: Aggregate  (cost=19531.49..19531.50 rows=1 width=68)
         origin_cost = rows[0][0].split("=")[1]
         origin_cost = origin_cost.split("..")[0]
         origin_cost = float(origin_cost)
         name = queryName[0:-4]
         name_to_cost[name] = origin_cost
+        print(origin_cost)
 
         # 将原始的查询计划直接表示为pghint可以接受的括号形式,存入lableDect
         lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
-        print(queryName, lableDect[queryName[:-4]])
+        # print(queryName, lableDect[queryName[:-4]])
 
         # 更新long_to_short和long_to_short
         scan_language = []
@@ -107,7 +108,7 @@ def getResource():
             short_to_long[word[index + 2]] = word[index + 1]
 
     # print(len(long_to_short))
-    print(len(short_to_long))
+    # print(len(short_to_long))
 
     # f = open(nametocostpath, 'w')
     # f.write(str(name_to_cost))
