@@ -37,8 +37,8 @@ predicatesEncodeDict = {}
 
 
 # 初始化连接矩阵和谓词向量
-joinEncode = [0 for _ in range(len(tableNames)*len(tableNames))]
-predicatesEncode = [0 for _ in range(len(attrNames))]
+joinEncode = []
+predicatesEncode = []
 
 # 数据库连接参数
 print("connecting...")
