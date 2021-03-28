@@ -326,9 +326,47 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NULL, paramlist)
                         else:
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NOT_NULL, paramlist)
-
+            # 处理 'IN' 谓词
+            # FIXME: 未处理 'NOT IN' ,113条sql语句中没有
+            elif "IN" in temp:
+                index = temp.index("IN")
+                paramlist = []
+                table = temp[index - 1].split('.')[0].replace("(","")
+                tablename = short_to_long[table]
+                # 获取过滤阈值
+                param = temp[index + 1]
+                # 接下来n行参数，以')'结尾
+                if param[0] == "(":
+                    param = param[2:-2]
+                    paramlist.append(param)
+                    for j in range(i + 1, len(file_context)):
+                        temp = file_context[j].split()
+                        if len(temp) > 1:
+                            print("BAD TEMP:",temp)
+                            sys.exit()
+                        param = temp[0]
+                        if param[len(param) - 1] == ",":
+                            paramlist.append(param[1:-2])
+                        elif param[len(param) - 1] == ")":
+                            paramlist.append(param[1:-2])
+                            break
+                else:
+                    if param[0] == "'":
+                        param = param[1 : -1]
+                    paramlist.append(param)
+                                for word in temp:         
+                for word in temp:
+                    if '.' in word:
+                        if word[0] == "'":
+                            continue
+                        word = filter(word)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IN, paramlist)
 
             else:
+                print(temp)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
