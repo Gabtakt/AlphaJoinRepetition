@@ -153,8 +153,8 @@ def getQueryEncode(attrNames):
                 # 选择过滤: '=' 谓词后为具体数据
                 else:
                     paramlist = []
-                    table = temp[index - 1].split('.')[0]
-                    tablename = short_to_long[table].replace("(","")
+                    table = temp[index - 1].split('.')[0].replace("(","")
+                    tablename = short_to_long[table]
                     # 获取过滤阈值
                     param = temp[index + 1]
                     if param[0] == '\'':
