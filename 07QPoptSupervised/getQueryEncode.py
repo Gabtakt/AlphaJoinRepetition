@@ -353,8 +353,7 @@ def getQueryEncode(attrNames):
                 else:
                     if param[0] == "'":
                         param = param[1 : -1]
-                    paramlist.append(param)
-                                for word in temp:         
+                    paramlist.append(param)       
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
