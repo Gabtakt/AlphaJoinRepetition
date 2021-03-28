@@ -156,7 +156,10 @@ def getQueryEncode(attrNames):
                     table = temp[index - 1].split('.')[0]
                     tablename = short_to_long[table]
                     # 获取过滤阈值
-                    paramlist.append(temp[index + 1])
+                    param = temp[index + 1]
+                    if param[0] == '\'':
+                        param = param[1 : -1]
+                    paramlist.append(param)
                     for word in temp:
                         if '.' in word:
                             if word[0] == "'":
@@ -171,7 +174,10 @@ def getQueryEncode(attrNames):
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
                 # 获取过滤阈值
-                paramlist.append(temp[index + 1])
+                param = temp[index + 1]
+                if param[0] == '\'':
+                    param = param[1 : -1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
@@ -186,7 +192,10 @@ def getQueryEncode(attrNames):
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
                 # 获取过滤阈值
-                paramlist.append(temp[index + 1])
+                param = temp[index + 1]
+                if param[0] == '\'':
+                    param = param[1 : -1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
@@ -201,7 +210,10 @@ def getQueryEncode(attrNames):
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
                 # 获取过滤阈值
-                paramlist.append(temp[index + 1])
+                param = temp[index + 1]
+                if param[0] == '\'':
+                    param = param[1 : -1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
@@ -216,7 +228,10 @@ def getQueryEncode(attrNames):
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
                 # 获取过滤阈值
-                paramlist.append(temp[index + 1])
+                param = temp[index + 1]
+                if param[0] == '\'':
+                    param = param[1 : -1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
@@ -231,7 +246,10 @@ def getQueryEncode(attrNames):
                 table = temp[index - 1].split('.')[0]
                 tablename = short_to_long[table]
                 # 获取过滤阈值
-                paramlist.append(temp[index + 1])
+                param = temp[index + 1]
+                if param[0] == '\'':
+                    param = param[1 : -1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
