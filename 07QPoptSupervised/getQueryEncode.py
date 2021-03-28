@@ -426,6 +426,7 @@ def res_split(resStr):
     res = []
     if res is not None:
         resStr = resStr[1:-1] # 将字符串两端的花括号去除
+        print(resStr)
         begin = 0
         end = 0
         while begin < len(resStr):
