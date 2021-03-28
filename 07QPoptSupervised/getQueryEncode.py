@@ -435,6 +435,7 @@ def res_split(resStr):
                 while end < len(resStr):
                     # 以双引号结束，表示一个单词的完整出现
                     if resStr[end] == '"' and resStr[end - 1] != '\\':
+                        print(hintt)
                         res.append(resStr[begin + 1 : end]) # 去掉双引号，并将单词加入list
                         begin = end + 1
                         if resStr[begin] == ',':
@@ -449,13 +450,16 @@ def res_split(resStr):
                 end = begin + 1
                 while end < len(resStr):
                     if resStr[end] == ',':
+                        print(hintt)
                         res.append(resStr[begin : end])
                         begin = end + 1
                         if resStr[begin] == ',':
                             print(hint)
                             begin = begin + 1
+                        break
                     else:
                         end = end + 1
+    print('split done')
     return res
 
 
