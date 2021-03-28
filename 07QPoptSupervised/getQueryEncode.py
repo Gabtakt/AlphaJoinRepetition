@@ -326,6 +326,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     rows = cur.fetchall() # 这个查询只返回一行数据
 
     for row in rows:
+        print('here')
         null_frac = row[0] # real
         n_distinct = row[1] # real
         most_common_vals = res_split(row[2]) # list
