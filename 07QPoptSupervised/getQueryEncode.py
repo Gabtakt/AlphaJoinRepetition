@@ -458,7 +458,7 @@ def res_split(resStr):
                     else:
                         end = end + 1
                 # 最后一个情况特殊处理，因为没有逗号结尾了
-                if end == len(resStr)
+                if end == len(resStr):
                     print(resStr[begin : end],begin,end,len(resStr))
                     res.append(resStr[begin : end])
     print('split done')
