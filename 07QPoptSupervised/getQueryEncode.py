@@ -326,7 +326,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         rows = cur.fetchall()
 
         for row in rows:
-            n_distinct = row[0] * (-n_distinct)
+            n_distinct = (int)row[0] * (-n_distinct)
 
     selectivity = 0.0
     # 针对不同谓词情况分别计算选择率
