@@ -340,11 +340,7 @@ def getQueryEncode(attrNames):
                     param = param[2:-2]
                     paramlist.append(param)
                     for j in range(i + 1, len(file_context)):
-                        temp = file_context[j].split()
-                        if len(temp) > 1:
-                            print("BAD TEMP:",temp)
-                            sys.exit()
-                        param = temp[0]
+                        param = file_context[j]
                         if param[len(param) - 1] == ",":
                             paramlist.append(param[1:-2])
                         elif param[len(param) - 1] == ")":
