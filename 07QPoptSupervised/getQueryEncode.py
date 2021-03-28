@@ -1,9 +1,11 @@
 # 将所有的查询语句进行编码，编码为一个连接矩阵加一个谓词向量
 
 import os
+import operator
 from getResource import getResource
 import psycopg2
 from enum import Enum
+
 
 querydir = '../resource/jobquery'   # imdb的113条查询语句
 tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名（缩写）
@@ -12,6 +14,7 @@ longtoshortpath = '../resource/longtoshort'   # 表的全名到缩写的映射�
 shorttolongpath = '../resource/shorttolong'   # 表的缩写到全名的映射，共28个
 predicatesEncodeDictpath = './predicatesEncodedDict'   # 谓词的编码
 queryEncodeDictpath = './queryEncodedDict'   # 查询语句的编码
+
 
 # 所有常见谓词的枚举类，用于获取属性列选择率时传入参数以区分操作
 class Predicate(Enum):
@@ -40,6 +43,7 @@ predicatesEncodeDict = {}
 joinEncode = []
 predicatesEncode = []
 
+
 # 数据库连接参数
 print("connecting...")
 conn = psycopg2.connect(database="imdb", user="imdb", password="imdb", host="localhost", port="5432")
@@ -49,7 +53,6 @@ print("connect success")
 
 # 得到所有的attribution，用于进行选择过滤向量
 def getQueryAttributions():
-
     fileList = os.listdir(querydir)
     fileList.sort()
     attr = set()
@@ -84,8 +87,6 @@ def getQueryAttributions():
 
 # 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
-
-
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
     a = f.read()
@@ -114,8 +115,6 @@ def getQueryEncode(attrNames):
 
     fileList = os.listdir(querydir)
     fileList.sort()
-
-
     for queryName in fileList:
 
         # 初始化连接矩阵和谓词向量
@@ -267,7 +266,6 @@ def getQueryEncode(attrNames):
 
 # 处理属性列，将(A.a1... 或 A.a1; 处理为A.a1
 def filter(word):
-
     # 剪切掉左括号符号（不会出现含右括号的情况）
     if word[0] == '(':
         word = word[1:]
@@ -279,7 +277,6 @@ def filter(word):
 
 
 def getAttributionProportion(tablename, attname, predicate, paramlist):
-
     sql = '''
     SELECT null_frac,
            n_distinct,
@@ -289,24 +286,116 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     FROM pg_stats 
     WHERE tablename = '%s' and attname = '%s';
     ''' % (tablename, attname)
-    
     cur.execute(sql)
-    rows = cur.fetchall()
+    rows = cur.fetchall() # 这个查询只返回一行数据
 
     for row in rows:
-        null_frac = row[0]
-        n_distinct = row[1]
-        most_common_vals = row[2]
-        most_common_freqs = row[3]
-        histogram_bounds = row[4]
-        print(null_frac,n_distinct,most_common_vals,most_common_freqs,histogram_bounds)
-
+        null_frac = row[0] # real
+        n_distinct = row[1] # real
+        most_common_vals = row[2] # list
+        most_common_freqs = row[3] # list
+        histogram_bounds = row[4] # list,不包含most_common_val的统计
 
     selectivity = 0.0
 
+    # 针对不同谓词情况分别计算选择率
+    # FIXME: LIKE/NOT LIKE谓词暂未处理
+    if predicate == Predicate.EQ or predicate == Predicate.NEQ:
+        param = paramlist[0]
+        sum_of_most_common_freqs = 0.0
+        # 查找最常值，若参数在最常值中，则直接返回其频率作为选择率
+        index = 0
+        for val in most_common_vals:
+            sum_of_most_common_freqs += most_common_freqs[index]
+            if operator.eq(val, param):
+                if predicate == Predicate.EQ:
+                    selectivity = most_common_freqs[index]
+                else:
+                    selectivity = 1 - most_common_freqs[index]
+                return selectivity
+            index = index + 1
+        if predicate == Predicate.EQ:
+            selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+        else:
+            selectivity = 1 - (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+       
+    elif predicate == Predicate.BG or predicate == Predicate.BGE or predicate == Predicate.L or predicate == Predicate.LE: 
+        param = paramlist[0]
+        sum_of_most_common_freqs = 0.0
+        # 查找直方图信息，找到参数所在的bucket的index
+        index = 0
+        num_buckets = len(histogram_bounds) - 1
+        for val in histogram_bounds:
+            if operator.le(param, val):
+                break
+            index = index + 1
+        if predicate == Predicate.BG or predicate == Predicate.BGE:
+            selectivity = 1 - index / num_buckets
+        else:
+            selectivity = index / num_buckets
+        
+    elif predicate == Predicate.LIKE:
+        selectivity = 1.0
 
+    elif predicate == Predicate.NOT_LIKE:
+        selectivity = 1.0
 
-    return 1
+    elif predicate == Predicate.IS_NULL:
+        selectivity = null_frac
+
+    elif predicate == Predicate.IS_NOT_NULL:
+        selectivity = 1 - null_frac
+        
+    elif predicate == Predicate.BETWEEN or predicate == Predicate.NOT_BETWEEN:
+        begin = paramlist[0]
+        end = paramlist[1]
+        index1 = 0
+        index2 = 0
+        num_buckets = len(histogram_bounds) - 1
+        # 查找直方图，统计begin和end参数之间的buckt数
+        for val in histogram_bounds:
+            if operator.le(begin, val)
+                break
+            index1 = index1 + 1
+        index2 = index1 + 1
+        while index2 < num_buckets:
+            if operator.le(end, histogram_bounds[index2])
+                break
+            index2 = index2 + 1
+        if predicate == Predicate.BETWEEN
+            selectivity = (index2 - index1) / num_buckets
+        else:
+            selectivity = 1 - (index2 - index1) / num_buckets
+        
+    elif predicate == Predicate.IN:
+        sum_of_most_common_freqs = 0.0
+        # 计算所有最常值的频率
+        for val in most_common_freqs:
+            sum_of_most_common_freqs += val
+
+        # 标准选择率，与等值过滤的选择率相同
+        normal_selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+
+        # 查找参数列表中每个参数是否在最常值中
+        for param in paramlist:
+            # 查找最常值，若参数在最常值中，则累加其频率
+            index = 0
+            flag = False
+            for val in most_common_vals:
+                if operator.eq(val, param):
+                    selectivity = selectivity + most_common_freqs[index]
+                    flag = True
+                    break
+                index = index + 1
+            # 若不在最常值中，则累加标准选择率
+            if not flag:
+                selectivity = selectivity + normal_selectivity
+
+    else:
+        print('BAD PREDICATE' + str(predicate))
+        sys.exit()
+
+    return selectivity
 
 
 if __name__ == '__main__':
