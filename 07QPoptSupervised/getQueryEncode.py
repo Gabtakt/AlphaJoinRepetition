@@ -144,8 +144,8 @@ def getQueryEncode(attrNames):
 
                 # 等值连接: '=' 谓词前后均为attribution
                 if (filter(temp[index - 1]) in attrNames) & (filter(temp[index + 1]) in attrNames):
-                    table1 = temp[index - 1].split('.')[0]
-                    table2 = temp[index + 1].split('.')[0]
+                    table1 = temp[index - 1].split('.')[0].replace("(","")
+                    table2 = temp[index + 1].split('.')[0].replace("(","")
                     # 连接矩阵对应位置设置为1表示i两个表之间存在连接关系
                     joinEncode[table_to_int[table1] * len(tableNames) + table_to_int[table2]] = 1
                     joinEncode[table_to_int[table2] * len(tableNames) + table_to_int[table1]] = 1
@@ -154,7 +154,7 @@ def getQueryEncode(attrNames):
                 else:
                     paramlist = []
                     table = temp[index - 1].split('.')[0]
-                    tablename = short_to_long[table]
+                    tablename = short_to_long[table].replace("(","")
                     # 获取过滤阈值
                     param = temp[index + 1]
                     if param[0] == '\'':
@@ -174,7 +174,7 @@ def getQueryEncode(attrNames):
             elif "!=" in temp:
                 index = temp.index("!=")
                 paramlist = []
-                table = temp[index - 1].split('.')[0]
+                table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
@@ -195,7 +195,7 @@ def getQueryEncode(attrNames):
             elif ">" in temp:
                 index = temp.index(">")
                 paramlist = []
-                table = temp[index - 1].split('.')[0]
+                table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
@@ -216,7 +216,7 @@ def getQueryEncode(attrNames):
             elif "<" in temp:
                 index = temp.index("<")
                 paramlist = []
-                table = temp[index - 1].split('.')[0]
+                table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
@@ -234,7 +234,7 @@ def getQueryEncode(attrNames):
             elif ">=" in temp:
                 index = temp.index(">=")
                 paramlist = []
-                table = temp[index - 1].split('.')[0]
+                table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
@@ -255,7 +255,7 @@ def getQueryEncode(attrNames):
             elif "<=" in temp:
                 index = temp.index("<=")
                 paramlist = []
-                table = temp[index - 1].split('.')[0]
+                table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
