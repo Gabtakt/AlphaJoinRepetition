@@ -359,10 +359,10 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             index1 = index1 + 1
         index2 = index1 + 1
         while index2 < num_buckets:
-            if operator.le(end, histogram_bounds[index2])
+            if operator.le(end, histogram_bounds[index2]):
                 break
             index2 = index2 + 1
-        if predicate == Predicate.BETWEEN
+        if predicate == Predicate.BETWEEN:
             selectivity = (index2 - index1) / num_buckets
         else:
             selectivity = 1 - (index2 - index1) / num_buckets
