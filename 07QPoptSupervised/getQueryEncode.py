@@ -354,7 +354,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         num_buckets = len(histogram_bounds) - 1
         # 查找直方图，统计begin和end参数之间的buckt数
         for val in histogram_bounds:
-            if operator.le(begin, val)
+            if operator.le(begin, val):
                 break
             index1 = index1 + 1
         index2 = index1 + 1
