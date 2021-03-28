@@ -292,12 +292,12 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     for row in rows:
         null_frac = row[0] # real
         n_distinct = row[1] # real
-        most_common_vals = row[2] # list
+        most_common_vals = res_split(row[2]) # list
         most_common_freqs = row[3] # list
-        histogram_bounds = row[4] # list,不包含most_common_val的统计
+        histogram_bounds = res_split(row[4]) # list,不包含most_common_val的统计
+        print(type(row[2],type(row[4])))
 
     selectivity = 0.0
-
     # 针对不同谓词情况分别计算选择率
     # FIXME: LIKE/NOT LIKE谓词暂未处理
     if predicate == Predicate.EQ or predicate == Predicate.NEQ:
@@ -396,6 +396,24 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         sys.exit()
 
     return selectivity
+
+
+def res_split(resStr):
+    '''
+    pg数据库查询pg_stats表返回结果中，most_commoin_vals 和 histogram_bounds的返回结果
+    是一整行的字符串，需要进行分割得到期望的list，分隔符是: ,
+    注意以下几种特殊情况：
+    1. 返回结果对包含空格的字符串添加的双引号，需要去除
+    2. 返回结果中双引号包含转义字符 \ 来转移双引号
+    3. 某个字符串中可能包含','，因此不能简单地用','分割，这里用扫描字符串的形式
+    流程如下：
+    从前往后扫描，若是双引号，则表明一个单词的开始，接着扫描到下一个双引号且前驱不是'\'的时候结束
+    (当单词内包含空格或不是分隔符含义的','时需要双引号括起来)
+    若不是双引号，则扫描到下一个','时得到一个单词
+    '''
+    res = []
+    
+    return res
 
 
 if __name__ == '__main__':
