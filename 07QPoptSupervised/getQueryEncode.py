@@ -278,8 +278,6 @@ def getQueryEncode(attrNames):
 
     cur.close()
     conn.close()
-    print(attr_to_int['cn.country_code'])
-    print(int_to_attr[19])
 
     print("done")
 
@@ -328,7 +326,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         rows = cur.fetchall()
 
         for row in rows:
-            n_distinct = row[0]
+            n_distinct = row[0] * (-n_distinct)
 
     selectivity = 0.0
     # 针对不同谓词情况分别计算选择率
