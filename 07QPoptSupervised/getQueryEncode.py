@@ -277,6 +277,7 @@ def filter(word):
 
 
 def getAttributionProportion(tablename, attname, predicate, paramlist):
+    print(tablename,attname,paramlist)
     sql = '''
     SELECT null_frac,
            n_distinct,
