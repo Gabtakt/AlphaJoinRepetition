@@ -505,8 +505,9 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     elif predicate == Predicate.IN:
         sum_of_most_common_freqs = 0.0
         # 计算所有最常值的频率
-        for val in most_common_freqs:
-            sum_of_most_common_freqs += val
+        if most_common_freqs is not None:
+            for val in most_common_freqs:
+                sum_of_most_common_freqs += val
 
         # 标准选择率，与等值过滤的选择率相同
         normal_selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
