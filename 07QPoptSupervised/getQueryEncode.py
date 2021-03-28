@@ -426,7 +426,7 @@ def res_split(resStr):
     res = []
     if res is not None:
         resStr = resStr[1:-1] # 将字符串两端的花括号去除
-        print(resStr)
+        print()
         begin = 0
         end = 0
         while begin < len(resStr):
@@ -454,12 +454,13 @@ def res_split(resStr):
                         print(resStr[begin : end],begin,end,len(resStr))
                         res.append(resStr[begin : end])
                         begin = end + 1
-                        # if resStr[begin] == ',':
-                        #     print(hint)
-                        #     begin = begin + 1
                         break
                     else:
                         end = end + 1
+                # 最后一个情况特殊处理，因为没有逗号结尾了
+                if end = len(resStr)
+                    print(resStr[begin : end],begin,end,len(resStr))
+                    res.append(resStr[begin : end])
     print('split done')
     return res
 
