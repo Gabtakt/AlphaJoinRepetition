@@ -295,9 +295,19 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         most_common_vals = res_split(row[2]) # list
         most_common_freqs = row[3] # list
         histogram_bounds = res_split(row[4]) # list,不包含most_common_val的统计
-        if (row[2] is None or row[4] is None)
-            print(type(row[2]),type(row[4]),NoneType here)
-        print(type(most_common_vals),type(histogram_bounds)))
+    
+    # 该属性列上有唯一性约束，则查询表的行数估计作为不同值个数
+    if n_distinct == -1:
+        sql = '''
+        SELECT reltuples
+        FROM pg_class
+        WHERE relkind = 'r' AND relname = '%s';
+        ''' % (tablename)
+        cur.execute(sql)
+        rows = cur.fetchall()
+
+        fow row in rows:
+            n_distinct = row[0]
 
     selectivity = 0.0
     # 针对不同谓词情况分别计算选择率
@@ -414,7 +424,38 @@ def res_split(resStr):
     若不是双引号，则扫描到下一个','时得到一个单词
     '''
     res = []
-    
+    if res is not None:
+        resStr = resStr[1:-1] # 将字符串两端的花括号去除
+        begin = 0
+        end = 0
+        while begin < len(resStr):
+            # 以双引号开头的单词分割
+            if resStr[begin] == '"':
+                end = begin + 1
+                while end < len(resStr):
+                    # 以双引号结束，表示一个单词的完整出现
+                    if resStr[end] == '"' and resStr[end - 1] != '\\':
+                        res.append(resStr[begin + 1 : end]) # 去掉双引号，并将单词加入list
+                        begin = end + 1
+                        if resStr[begin] == ',':
+                            print(hint)
+                            begin = begin + 1
+                        break
+                    # 继续扫描
+                    else:
+                        end = end + 1
+            # 常规开头，逗号分割
+            else:
+                end = begin + 1
+                while end < len(resStr):
+                    if resStr[end] == ',':
+                        res.append(resStr[begin : end])
+                        begin = end + 1
+                        if resStr[begin] == ',':
+                            print(hint)
+                            begin = begin + 1
+                    else:
+                        end = end + 1
     return res
 
 
