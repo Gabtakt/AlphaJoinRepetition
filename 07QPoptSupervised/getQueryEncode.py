@@ -436,11 +436,10 @@ def res_split(resStr):
                 while end < len(resStr):
                     # 以双引号结束，表示一个单词的完整出现
                     if resStr[end] == '"' and resStr[end - 1] != '\\':
-                        print(resStr[begin + 1 : end])
+                        print(resStr[begin : end],begin,end,len(resStr))
                         res.append(resStr[begin + 1 : end]) # 去掉双引号，并将单词加入list
                         begin = end + 1
                         if resStr[begin] == ',':
-                            print(hint)
                             begin = begin + 1
                         break
                     # 继续扫描
