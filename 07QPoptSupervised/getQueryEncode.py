@@ -295,7 +295,9 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         most_common_vals = res_split(row[2]) # list
         most_common_freqs = row[3] # list
         histogram_bounds = res_split(row[4]) # list,不包含most_common_val的统计
-        print(type(row[2],type(row[4])))
+        if (row[2] is None or row[4] is None)
+            print(type(row[2]),type(row[4]),NoneType here)
+        print(type(most_common_vals),type(histogram_bounds)))
 
     selectivity = 0.0
     # 针对不同谓词情况分别计算选择率
