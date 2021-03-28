@@ -279,6 +279,7 @@ def getQueryEncode(attrNames):
     cur.close()
     conn.close()
     print(attr_to_int['cn.country_code'])
+    print(int_to_attr[19])
 
     print("done")
 
