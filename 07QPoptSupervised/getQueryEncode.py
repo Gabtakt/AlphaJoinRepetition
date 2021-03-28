@@ -461,6 +461,7 @@ def res_split(resStr):
                 if end == len(resStr):
                     print(resStr[begin : end],begin,end,len(resStr))
                     res.append(resStr[begin : end])
+                    begin = end + 1
     print('split done')
     return res
 
