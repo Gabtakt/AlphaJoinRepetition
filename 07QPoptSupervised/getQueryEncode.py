@@ -137,7 +137,7 @@ def getQueryEncode(attrNames):
         # 处理WHERE后面的谓词筛选条件
         for i in range(k, len(file_context)):
             temp = file_context[i].split()
-
+            print(temp)
             # 处理 '=' 谓词
             if "=" in temp:
                 index = temp.index("=")
@@ -165,7 +165,10 @@ def getQueryEncode(attrNames):
                             if word[0] == "'":
                                 continue
                             word = filter(word)
-                            predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
+                            base = 1
+                            if predicatesEncode[attr_to_int[word]] != 0:
+                                base = predicatesEncode[attr_to_int[word]]
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
 
             # 处理 '!=' 谓词
             elif "!=" in temp:
@@ -183,7 +186,10 @@ def getQueryEncode(attrNames):
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
 
             # 处理 '>'谓词
             elif ">" in temp:
@@ -201,7 +207,10 @@ def getQueryEncode(attrNames):
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
 
             # 处理 '<'谓词
             elif "<" in temp:
@@ -237,7 +246,10 @@ def getQueryEncode(attrNames):
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
 
             # 处理 '<='谓词
             elif "<=" in temp:
@@ -255,7 +267,12 @@ def getQueryEncode(attrNames):
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
+
+            # elif "BETWEEN" in temp:
 
             else:
                 for word in temp:
@@ -366,10 +383,10 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             selectivity = index / num_buckets
         
     elif predicate == Predicate.LIKE:
-        selectivity = 1.0
+        selectivity = 0.1
 
     elif predicate == Predicate.NOT_LIKE:
-        selectivity = 1.0
+        selectivity = 0.1
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
