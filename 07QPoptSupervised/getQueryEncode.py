@@ -87,6 +87,7 @@ def getQueryAttributions():
 
 # 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
+    fuck_str = []
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
     a = f.read()
@@ -169,6 +170,8 @@ def getQueryEncode(attrNames):
                             if predicatesEncode[attr_to_int[word]] != 0:
                                 base = predicatesEncode[attr_to_int[word]]
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
+                            if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                                fuck_str.append(word)
 
             # 处理 '!=' 谓词
             elif "!=" in temp:
@@ -190,6 +193,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 '>'谓词
             elif ">" in temp:
@@ -211,6 +216,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 '<'谓词
             elif "<" in temp:
@@ -232,6 +239,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 '>='谓词
             elif ">=" in temp:
@@ -253,6 +262,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 '<='谓词
             elif "<=" in temp:
@@ -274,6 +285,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 'BETWEEN ... AND ...' 谓词
             # FIXME: 没有添加NOT BETWEEN的识别，113条sql语句中没有
@@ -300,6 +313,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BETWEEN, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             # 处理 'IS NULL' 和 'IS NOT NULL' 谓词
             elif "NULL" in temp:
@@ -326,6 +341,8 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NULL, paramlist)
                         else:
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NOT_NULL, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
             # 处理 'IN' 谓词
             # FIXME: 未处理 'NOT IN' ,113条sql语句中没有
             elif "IN" in temp:
@@ -359,6 +376,8 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IN, paramlist)
+                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
+                            fuck_str.append(word)
 
             else:
                 print(temp)
@@ -384,6 +403,7 @@ def getQueryEncode(attrNames):
     conn.close()
 
     print("done")
+    print(fuck_str)
 
 
 # 处理属性列，将(A.a1... 或 A.a1; 处理为A.a1
