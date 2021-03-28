@@ -315,8 +315,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         most_common_freqs = row[3] # list
         histogram_bounds = res_split(row[4]) # list,不包含most_common_val的统计
     
-    # 该属性列上有唯一性约束，则查询表的行数估计作为不同值个数
-    if n_distinct == -1:
+    # 不同值的个数的比值的负数
+    if n_distinct < 0:
         sql = '''
         SELECT reltuples
         FROM pg_class
