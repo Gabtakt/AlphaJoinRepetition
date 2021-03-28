@@ -228,7 +228,10 @@ def getQueryEncode(attrNames):
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
 
             # 处理 '>='谓词
             elif ">=" in temp:
@@ -272,7 +275,58 @@ def getQueryEncode(attrNames):
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
 
-            # elif "BETWEEN" in temp:
+            # 处理 'BETWEEN ... AND ...' 谓词
+            # FIXME: 没有添加NOT BETWEEN的识别，113条sql语句中没有
+            elif "BETWEEN" in temp:
+                index = temp.index("BETWEEN")
+                paramlist = []
+                table = temp[index - 1].split('.')[0].replace("(","")
+                tablename = short_to_long[table]
+                # 获取过滤阈值
+                param1 = temp[index + 1]
+                if param1[0] == "'":
+                    param1 = param1[1 : -1]
+                paramlist.append(param1)
+                param2 = temp[index + 3]
+                if param2[0] == "'":
+                    param2 = param2[1 : -1]
+                paramlist.append(param2)
+                for word in temp:
+                    if '.' in word:
+                        if word[0] == "'":
+                            continue
+                        word = filter(word)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BETWEEN, paramlist)
+
+            # 处理 'IS NULL' 和 'IS NOT NULL' 谓词
+            elif "NULL" in temp:
+                index = temp.index("NULL")
+                paramlist = []
+                is_null = False
+                # IS NULL
+                if temp[index - 1] == "IS":
+                    table = temp[index - 2].split('.')[0].replace("(","")
+                    is_null = True
+                # IS NOT NULL
+                elif temp[index - 1] == "NOT":
+                    table = temp[index - 3].split('.')[0].replace("(","")
+                tablename = short_to_long[table]
+                for word in temp:
+                    if '.' in word:
+                        if word[0] == "'":
+                            continue
+                        word = filter(word)
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        if is_null:
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NULL, paramlist)
+                        else:
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NOT_NULL, paramlist)
+
 
             else:
                 for word in temp:
@@ -326,7 +380,6 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     rows = cur.fetchall() # 这个查询只返回一行数据
 
     for row in rows:
-        print('here')
         null_frac = row[0] # real
         n_distinct = row[1] # real
         most_common_vals = res_split(row[2]) # list
@@ -463,7 +516,6 @@ def res_split(resStr):
     res = []
     if resStr is not None:
         resStr = resStr[1:-1] # 将字符串两端的花括号去除
-        print()
         begin = 0
         end = 0
         while begin < len(resStr):
