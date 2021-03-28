@@ -450,12 +450,12 @@ def res_split(resStr):
                 end = begin + 1
                 while end < len(resStr):
                     if resStr[end] == ',':
-                        print(resStr[ : end])
+                        print(resStr[begin : end])
                         res.append(resStr[begin : end])
                         begin = end + 1
-                        if resStr[begin] == ',':
-                            print(hint)
-                            begin = begin + 1
+                        # if resStr[begin] == ',':
+                        #     print(hint)
+                        #     begin = begin + 1
                         break
                     else:
                         end = end + 1
