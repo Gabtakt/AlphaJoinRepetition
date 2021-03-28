@@ -424,7 +424,7 @@ def res_split(resStr):
     若不是双引号，则扫描到下一个','时得到一个单词
     '''
     res = []
-    if res is not None:
+    if resStr is not None:
         resStr = resStr[1:-1] # 将字符串两端的花括号去除
         print()
         begin = 0
