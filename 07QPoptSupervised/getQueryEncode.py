@@ -157,7 +157,7 @@ def getQueryEncode(attrNames):
                     tablename = short_to_long[table]
                     # 获取过滤阈值
                     param = temp[index + 1]
-                    if param[0] == '\'':
+                    if param[0] == "'":
                         param = param[1 : -1]
                     paramlist.append(param)
                     for word in temp:
@@ -178,7 +178,7 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                if param[0] == '\'':
+                if param[0] == "'":
                     param = param[1 : -1]
                 paramlist.append(param)
                 for word in temp:
@@ -199,7 +199,7 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                if param[0] == '\'':
+                if param[0] == "'":
                     param = param[1 : -1]
                 paramlist.append(param)
                 for word in temp:
@@ -220,7 +220,7 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                if param[0] == '\'':
+                if param[0] == "'":
                     param = param[1 : -1]
                 paramlist.append(param)
                 for word in temp:
@@ -238,7 +238,7 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                if param[0] == '\'':
+                if param[0] == "'":
                     param = param[1 : -1]
                 paramlist.append(param)
                 for word in temp:
@@ -259,7 +259,7 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                if param[0] == '\'':
+                if param[0] == "'":
                     param = param[1 : -1]
                 paramlist.append(param)
                 for word in temp:
