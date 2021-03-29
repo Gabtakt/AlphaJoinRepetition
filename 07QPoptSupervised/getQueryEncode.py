@@ -499,11 +499,12 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             if operator.le(param, val):
                 break
             index = index + 1
+        if index == 0:
+            index = 1
         if predicate == Predicate.BG or predicate == Predicate.BGE:
-            index = index - 1
             selectivity = ((1.0 - sum_of_most_common_freqs + null_frac)) * (1.0 - index * 1.0 / num_buckets)
         else:
-            selectivity = ((1.0 - sum_of_most_common_freqs + null_frac)) * index / num_buckets
+            selectivity = ((1.0 - sum_of_most_common_freqs + null_frac)) * (1.0 * index) / num_buckets
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
