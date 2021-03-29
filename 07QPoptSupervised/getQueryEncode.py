@@ -345,8 +345,8 @@ def getQueryEncode(attrNames):
                     for j in range(i + 1, len(file_context)):
                         param = file_context[j]
                         print(param)
-                        paramlist.append(param[1:-2])
                         if param[len(param) - 1] == ")":
+                            paramlist.append(param[1:-2])
                             i = j
                             print('fix i:',i)
                             break
