@@ -2,6 +2,7 @@
 
 import os
 import operator
+import re
 from getResource import getResource
 import psycopg2
 from enum import Enum
@@ -624,6 +625,16 @@ def res_split(resStr):
                     res.append(resStr[begin : end])
                     begin = end + 1
     # print('split done')
+    count = 0
+    for val in res:
+        if not val.isnumeric():
+            break
+        count = count + 1
+    if count == len(res):
+        res2 = []
+        for val in res:
+            res2.append(int(val))
+        res = res2
     return res
 
 
