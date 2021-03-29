@@ -337,13 +337,14 @@ def getQueryEncode(attrNames):
                 tablename = short_to_long[table]
                 # 获取过滤阈值
                 param = temp[index + 1]
-                print(param)
                 # 接下来n行参数，以')'结尾
                 if param[0] == "(":
                     param = param[2:-2]
+                    print(param)
                     paramlist.append(param)
                     for j in range(i + 1, len(file_context)):
                         param = file_context[j]
+                        print(param)
                         paramlist.append(param[1:-2])
                         if param[len(param) - 1] == ")":
                             i = j
