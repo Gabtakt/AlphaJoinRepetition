@@ -356,8 +356,8 @@ def getQueryEncode(attrNames):
                         print(param[1:-2])
                 # IN 谓词只有一行参数
                 else:
-                param = param[2:-2]
-                paramlist.append(param)
+                    param = param[2:-2]
+                    paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
