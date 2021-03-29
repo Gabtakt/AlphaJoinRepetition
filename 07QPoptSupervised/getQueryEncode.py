@@ -195,7 +195,6 @@ def getQueryEncode(attrNames):
 
             # 处理 '>'谓词
             elif ">" in temp:
-                print(temp)
                 index = temp.index(">")
                 paramlist = []
                 table = temp[index - 1].split('.')[0].replace("(","")
@@ -491,6 +490,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
     elif predicate == Predicate.BG or predicate == Predicate.BGE or predicate == Predicate.L or predicate == Predicate.LE: 
         param = paramlist[0]
         sum_of_most_common_freqs = 0.0
+        for val in most_common_freqs:
+            sum_of_most_common_freqs = sum_of_most_common_freqs + val
         # 查找直方图信息，找到参数所在的bucket的index
         index = 0
         num_buckets = len(histogram_bounds) - 1
@@ -499,9 +500,10 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
                 break
             index = index + 1
         if predicate == Predicate.BG or predicate == Predicate.BGE:
-            selectivity = 1 - index / num_buckets
+            index = index - 1
+            selectivity = ((1.0 - sum_of_most_common_freqs + null_frac)) * (1.0 - index * 1.0 / num_buckets)
         else:
-            selectivity = index / num_buckets
+            selectivity = ((1.0 - sum_of_most_common_freqs + null_frac)) * index / num_buckets
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
