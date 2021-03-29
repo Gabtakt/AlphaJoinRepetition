@@ -24,3 +24,7 @@ def checkEncode():
 
     # print(encodeDict1)
     # print(encodeDict2)
+
+
+if __name__ == '__main__':
+    checkEncode()
