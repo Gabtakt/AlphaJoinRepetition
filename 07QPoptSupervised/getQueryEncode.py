@@ -336,10 +336,8 @@ def getQueryEncode(attrNames):
                 paramlist = []
                 table = temp[index - 1].split('.')[0].replace("(","")
                 tablename = short_to_long[table]
-                # 获取过滤阈值
-                param = temp[index + 1]
                 # 接下来n行参数，以')'结尾
-                if param[-1] != ")":
+                if temp[len(temp) - 1][-1] != ")":
                     param = param[2:-2]
                     paramlist.append(param)
                     for j in range(i + 1, len(file_context)):
@@ -356,8 +354,7 @@ def getQueryEncode(attrNames):
                 # IN 谓词只有一行参数，需要处理参数有空格的情况，故再次取
                 else:
                     temp2 = file_context[i].split("IN")
-                    index2 = temp2.index("IN")
-                    param = temp2[index + 1].strip()
+                    param = temp2[1].strip()
                     param = param[2:-2]
                     paramlist.append(param)
                 for word in temp:
