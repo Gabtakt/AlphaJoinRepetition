@@ -22,10 +22,10 @@ def checkEncode():
         for i in range(0,len(V)):
             if V[i] != 0:
                 if V2[i] == 0:
-                    print('diff here.',K,V,V2,i)
+                    print('diff here 1.',K,V[i],V2[i],i)
             if V2[i] != 0:
                 if V[i] == 0:
-                    print('diff here.',K,V,V2,i)
+                    print('diff here 2.',K,V[i],V2[i],i)
 
     # print(encodeDict1)
     # print(encodeDict2)
