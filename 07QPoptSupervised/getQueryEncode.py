@@ -369,7 +369,7 @@ def getQueryEncode(attrNames):
                     table = temp[index - 2].split('.')[0].replace("(","")
                 else:
                     table = temp[index - 1].split('.')[0].replace("(","")
-                tablename = short_to_long(table)
+                tablename = short_to_long[table]
                 param = temp[index + 1]
                 if param[0] == "'":
                     param = param[1:-1]
