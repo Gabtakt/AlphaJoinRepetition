@@ -353,8 +353,11 @@ def getQueryEncode(attrNames):
                             i = j
                             break
                         paramlist.append(param[1:-2])
-                # IN 谓词只有一行参数
+                # IN 谓词只有一行参数，需要处理参数有空格的情况，故再次取
                 else:
+                    temp2 = temp.split("IN")
+                    index2 = temp2.index("IN")
+                    param = temp2[index + 1].strip()
                     param = param[2:-2]
                     paramlist.append(param)
                 for word in temp:
