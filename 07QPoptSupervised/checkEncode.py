@@ -18,7 +18,7 @@ def checkEncode():
 
     for K,V in encodeDict1.items():
         V2 = encodeDict2[K]
-        for i = 0 in range(0,len(V)):
+        for i in range(0,len(V)):
             if V[i] != 0:
                 assert(V2[i] != 0)
 
