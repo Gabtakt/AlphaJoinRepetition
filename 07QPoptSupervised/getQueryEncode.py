@@ -353,7 +353,6 @@ def getQueryEncode(attrNames):
                             i = j
                             break
                         paramlist.append(param[1:-2])
-                        print(param[1:-2])
                 # IN 谓词只有一行参数
                 else:
                     param = param[2:-2]
