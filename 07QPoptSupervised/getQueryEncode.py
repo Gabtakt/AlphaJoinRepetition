@@ -499,8 +499,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             if operator.le(param, val):
                 break
             index = index + 1
-        if index == num_buckets:
-            print('bad')
+        if index != 0:
+            index = index - 1
         if predicate == Predicate.BG or predicate == Predicate.BGE:
             selectivity = ((1.0 - sum_of_most_common_freqs - null_frac)) * (1.0 - index * 1.0 / num_buckets)
         else:
