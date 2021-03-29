@@ -505,7 +505,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             selectivity = ((1.0 - sum_of_most_common_freqs - null_frac)) * (1.0 - index * 1.0 / num_buckets)
         else:
             selectivity = ((1.0 - sum_of_most_common_freqs - null_frac)) * (1.0 * index) / num_buckets
-        if attname = 'episode_nr':
+        if attname == 'episode_nr':
             print('select episode_nr'),selectivity
 
     elif predicate == Predicate.IS_NULL:
