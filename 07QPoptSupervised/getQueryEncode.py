@@ -195,6 +195,7 @@ def getQueryEncode(attrNames):
 
             # 处理 '>'谓词
             elif ">" in temp:
+                print(temp)
                 index = temp.index(">")
                 paramlist = []
                 table = temp[index - 1].split('.')[0].replace("(","")
