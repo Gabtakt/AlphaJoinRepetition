@@ -136,7 +136,8 @@ def getQueryEncode(attrNames):
                 break
 
         # 处理WHERE后面的谓词筛选条件
-        for i in range(k, len(file_context)):
+        i = k
+        while i < len(file_context):
             temp = file_context[i].split()
             # 处理 '=' 谓词
             if "=" in temp:
@@ -344,6 +345,7 @@ def getQueryEncode(attrNames):
                         param = file_context[j]
                         paramlist.append(param[1:-2])
                         if param[len(param) - 1] == ")":
+                            i = j
                             break
                 else:
                     if param[0] == "'":
@@ -390,6 +392,7 @@ def getQueryEncode(attrNames):
 
             else:
                 print("BAD EXPRESSION",queryName,temp)
+            i = i + 1
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
         queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
