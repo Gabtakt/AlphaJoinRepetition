@@ -390,7 +390,6 @@ def getQueryEncode(attrNames):
 
             else:
                 print("BAD EXPRESSION",queryName,temp)
-                exit()
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
         queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
