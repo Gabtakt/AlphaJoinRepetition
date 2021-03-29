@@ -483,10 +483,11 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
                     selectivity = 1 - most_common_freqs[index]
                 return selectivity
             index = index + 1
+        p = 1.0 - sum_of_most_common_freqs - null_frac
         if predicate == Predicate.EQ:
-            selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+            selectivity = p / (n_distinct - len(most_common_vals))
         else:
-            selectivity = 1 - (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+            selectivity = 1 - p / (n_distinct - len(most_common_vals))
        
     elif predicate == Predicate.BG or predicate == Predicate.BGE or predicate == Predicate.L or predicate == Predicate.LE: 
         param = paramlist[0]
@@ -507,8 +508,6 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             selectivity = p * (1.0 - index * 1.0 / num_buckets)
         else:
             selectivity = p * (1.0 * index) / num_buckets
-        if attname == 'episode_nr':
-            print('select episode_nr',selectivity,predicate,param,p,index,type(param),type(histogram_bounds[0]))
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
@@ -546,6 +545,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
 
         # 标准选择率，与等值过滤的选择率相同
         normal_selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
+        if param == "tv series":
+            print(normal_Selectivity)
 
         # 查找参数列表中每个参数是否在最常值中
         for param in paramlist:
