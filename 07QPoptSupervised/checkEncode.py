@@ -27,8 +27,6 @@ def checkEncode():
                 if V[i] == 0:
                     print('diff here 2.',K,V[i],V2[i],i)
 
-    # print(encodeDict1)
-    # print(encodeDict2)
     print('done')
 
 
