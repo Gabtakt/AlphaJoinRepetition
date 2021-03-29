@@ -389,7 +389,7 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LIKE, paramlist)
 
             else:
-                print("BAD EXPRESSION",temp)
+                print("BAD EXPRESSION",queryName,temp)
                 exit()
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
