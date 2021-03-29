@@ -171,7 +171,7 @@ def getQueryEncode(attrNames):
                             base = 1
                             if predicatesEncode[attr_to_int[word]] != 0:
                                 base = predicatesEncode[attr_to_int[word]]
-                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, numstrList2numList(paramlist))
 
             # 处理 '!=' 谓词
             elif "!=" in temp:
@@ -192,7 +192,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, numstrList2numList(paramlist))
 
             # 处理 '>'谓词
             elif ">" in temp:
@@ -213,7 +213,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, numstrList2numList(paramlist))
 
             # 处理 '<'谓词
             elif "<" in temp:
@@ -234,7 +234,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.L, numstrList2numList(paramlist))
 
             # 处理 '>='谓词
             elif ">=" in temp:
@@ -255,7 +255,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, numstrList2numList(paramlist))
 
             # 处理 '<='谓词
             elif "<=" in temp:
@@ -276,7 +276,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, numstrList2numList(paramlist))
 
             # 处理 'BETWEEN ... AND ...' 谓词
             # FIXME: 没有添加NOT BETWEEN的识别，113条sql语句中没有
@@ -302,7 +302,7 @@ def getQueryEncode(attrNames):
                         base = 1
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
-                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BETWEEN, paramlist)
+                        predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BETWEEN, numstrList2numList(paramlist))
 
             # 处理 'IS NULL' 和 'IS NOT NULL' 谓词
             elif "NULL" in temp:
@@ -626,6 +626,12 @@ def res_split(resStr):
                     begin = end + 1
     # print('split done')
     count = 0
+    return numstrList2numList(res)
+
+
+# 将全是数字字符串的list转换为数字list
+def numstrList2numList(res):
+    count = 0
     for val in res:
         if not val.isnumeric():
             break
@@ -636,7 +642,6 @@ def res_split(resStr):
             res2.append(int(val))
         res = res2
     return res
-
 
 if __name__ == '__main__':
     # getResource()
