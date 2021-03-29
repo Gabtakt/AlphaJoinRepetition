@@ -338,21 +338,26 @@ def getQueryEncode(attrNames):
                 # 获取过滤阈值
                 param = temp[index + 1]
                 # 接下来n行参数，以')'结尾
+                if param[-1] != ")":
+                    param = param[2:-2]
+                    paramlist.append(param)
+                    for j in range(i + 1, len(file_context)):
+                        strList = file_context[j].split()
+                        print(strList)
+                        param = ""
+                        for val in strList:
+                            param = param + val + " "
+                        param = param[:-1]
+                        if param[len(param) - 1] == ")":
+                            paramlist.append(param[1:-2])
+                            i = j
+                            break
+                        paramlist.append(param[1:-2])
+                        print(param[1:-2])
+                # IN 谓词只有一行参数
+                else:
                 param = param[2:-2]
                 paramlist.append(param)
-                for j in range(i + 1, len(file_context)):
-                    strList = file_context[j].split()
-                    print(strList)
-                    param = ""
-                    for val in strList:
-                        param = param + val + " "
-                    param = param[:-1]
-                    if param[len(param) - 1] == ")":
-                        paramlist.append(param[1:-2])
-                        i = j
-                        break
-                    paramlist.append(param[1:-2])
-                    print(param[1:-2])     
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
