@@ -545,7 +545,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
 
         # 标准选择率，与等值过滤的选择率相同
         normal_selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
-        if param == "tv series":
+        if paramlist[0] == "tv series":
             print(normal_Selectivity)
 
         # 查找参数列表中每个参数是否在最常值中
