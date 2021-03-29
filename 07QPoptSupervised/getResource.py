@@ -9,11 +9,9 @@ querydir = '../resource/jobquery'  # imdb的113条查询语句
 tablenamedir = '../resource/jobtablename'  # imdb的113条查询语句对应的查询表名（缩写）
 queryplandir = '../resource/jobqueryplan'  # imdb的113条查询语句和其对应的查询计划
 longtoshortpath = '../resource/longtoshort'  # 表的全名到缩写的映射，共21个（有些被覆盖了）
-shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共39个
-nametocostpath = "../resource/nametocost"
-# labledir = './joblable'  # 查询语句对应的执行计划的表的顺序，从先连到后连，使用缩写
-# testdir = './jobtest'
-# labledectpath = './lableDect'
+shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共29个
+nametocostpath = "../resource/nametocost" # 查询语句到开销的映射
+labledectpath = './lableDect'
 
 
 def getResource():
@@ -93,7 +91,7 @@ def getResource():
         name_to_cost[name] = origin_cost
 
         # # 将原始的查询计划直接表示为pghint可以接受的括号形式,存入lableDect
-        # lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
+        lableDect[queryName[:-4]] = getHint(queryplan, 0, len(queryplan))
 
         # 更新long_to_short和long_to_short
         scan_language = []
@@ -106,15 +104,15 @@ def getResource():
             long_to_short[word[index + 1]] = word[index + 2]
             short_to_long[word[index + 2]] = word[index + 1]
 
-
-    # f = open(nametocostpath, 'w')
-    # f.write(str(name_to_cost))
-    # f.close()
-    #
-    # # 保存括号形式的lableDect字典
-    # f = open(labledectpath, 'w')
-    # f.write(str(lableDect))
-    # f.close()
+    # 保存查询语句到开销的字典
+    f = open(nametocostpath, 'w')
+    f.write(str(name_to_cost))
+    f.close()
+    
+    # 保存括号形式的lableDect字典
+    f = open(labledectpath, 'w')
+    f.write(str(lableDect))
+    f.close()
 
     # 将两个字典转存到对应文件中
     f = open(longtoshortpath, 'w')
