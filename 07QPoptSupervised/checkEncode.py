@@ -20,6 +20,7 @@ def checkEncode():
         V2 = encodeDict2[K]
         for i in range(0,len(V)):
             if V[i] != 0:
+                print(V[i],V2[i])
                 assert(V2[i] != 0)
 
     # print(encodeDict1)
