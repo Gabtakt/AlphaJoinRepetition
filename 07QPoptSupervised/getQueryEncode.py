@@ -113,7 +113,7 @@ def getQueryEncode(attrNames):
     for i in range(len(attrNames)):
         int_to_attr[i] = attrNames[i]
         attr_to_int[attrNames[i]] = i
-    print(int_to_attr[67],int_to_attr[68],int_to_attr[69])
+    print(int_to_attr[65],int_to_attr[31])
 
     fileList = os.listdir(querydir)
     fileList.sort()
