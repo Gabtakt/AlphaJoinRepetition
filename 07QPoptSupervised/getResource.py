@@ -6,10 +6,10 @@ import numpy as np
 import psycopg2
 
 querydir = '../resource/jobquery'  # imdb的113条查询语句
-tablenamedir = '../resource/jobtablename'  # imdb的113条查询语句对应的查询表名（缩写）
+tablenamedir = '../resource/jobtablename'  # imdb的113条查询语句对应的查询表名缩写
 queryplandir = '../resource/jobqueryplan'  # imdb的113条查询语句和其对应的查询计划
-longtoshortpath = '../resource/longtoshort'  # 表的全名到缩写的映射，共21个（有些被覆盖了）
-shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共29个
+longtoshortpath = '../resource/longtoshort'  # 表的全名到缩写的映射，共21个
+shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共28个
 nametocostpath = "../resource/nametocost" # 查询语句到开销的映射
 labledectpath = './lableDect'
 

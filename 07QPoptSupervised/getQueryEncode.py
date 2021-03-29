@@ -8,9 +8,9 @@ from enum import Enum
 
 
 querydir = '../resource/jobquery'   # imdb的113条查询语句
-tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名（缩写）
+tablenamedir = '../resource/jobtablename'   # imdb的113条查询语句对应的查询表名缩写
 queryplandir = '../resource/jobqueryplan'     # imdb的113条查询语句和其对应的查询计划
-longtoshortpath = '../resource/longtoshort'   # 表的全名到缩写的映射，共21个（有些被覆盖了）
+longtoshortpath = '../resource/longtoshort'   # 表的全名到缩写的映射，共21个
 shorttolongpath = '../resource/shorttolong'   # 表的缩写到全名的映射，共28个
 predicatesEncodeDictpath = './predicatesEncodedDict'   # 谓词的编码
 queryEncodeDictpath = './queryEncodedDict'   # 查询语句的编码
@@ -31,6 +31,7 @@ class Predicate(Enum):
     BETWEEN = 11
     NOT_BETWEEN = 12
     IN = 13
+    NOT_IN = 14
 
 
 # 编码为连接矩阵+谓词向量
@@ -87,7 +88,6 @@ def getQueryAttributions():
 
 # 得到了所有的attribution，接下来可以做编码
 def getQueryEncode(attrNames):
-    fuck_str = []
     # 读取所有表的缩写
     f = open(shorttolongpath, 'r')
     a = f.read()
@@ -100,14 +100,14 @@ def getQueryEncode(attrNames):
         tableNames.append(i)
     tableNames.sort()
 
-    # 表名缩写与数字（列表下标）的映射
+    # 表名缩写与数字(列表下标)的映射
     table_to_int = {}
     int_to_table = {}
     for i in range(len(tableNames)):
         int_to_table[i] = tableNames[i]
         table_to_int[tableNames[i]] = i
 
-    # 属性与数字（列表下标）的映射
+    # 属性与数字(列表下标)的映射
     attr_to_int = {}
     int_to_attr = {}
     for i in range(len(attrNames)):
@@ -138,7 +138,6 @@ def getQueryEncode(attrNames):
         # 处理WHERE后面的谓词筛选条件
         for i in range(k, len(file_context)):
             temp = file_context[i].split()
-            print(temp)
             # 处理 '=' 谓词
             if "=" in temp:
                 index = temp.index("=")
@@ -170,8 +169,6 @@ def getQueryEncode(attrNames):
                             if predicatesEncode[attr_to_int[word]] != 0:
                                 base = predicatesEncode[attr_to_int[word]]
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.EQ, paramlist)
-                            if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                                fuck_str.append(word)
 
             # 处理 '!=' 谓词
             elif "!=" in temp:
@@ -193,8 +190,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NEQ, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 '>'谓词
             elif ">" in temp:
@@ -216,8 +211,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BG, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 '<'谓词
             elif "<" in temp:
@@ -239,8 +232,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.L, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 '>='谓词
             elif ">=" in temp:
@@ -262,8 +253,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BGE, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 '<='谓词
             elif "<=" in temp:
@@ -285,8 +274,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 'BETWEEN ... AND ...' 谓词
             # FIXME: 没有添加NOT BETWEEN的识别，113条sql语句中没有
@@ -313,8 +300,6 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.BETWEEN, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
             # 处理 'IS NULL' 和 'IS NOT NULL' 谓词
             elif "NULL" in temp:
@@ -341,8 +326,7 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NULL, paramlist)
                         else:
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IS_NOT_NULL, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
+
             # 处理 'IN' 谓词
             # FIXME: 未处理 'NOT IN' ,113条sql语句中没有
             elif "IN" in temp:
@@ -358,10 +342,8 @@ def getQueryEncode(attrNames):
                     paramlist.append(param)
                     for j in range(i + 1, len(file_context)):
                         param = file_context[j]
-                        if param[len(param) - 1] == ",":
-                            paramlist.append(param[1:-2])
-                        elif param[len(param) - 1] == ")":
-                            paramlist.append(param[1:-2])
+                        paramlist.append(param[1:-2])
+                        if param[len(param) - 1] == ")":
                             break
                 else:
                     if param[0] == "'":
@@ -376,17 +358,39 @@ def getQueryEncode(attrNames):
                         if predicatesEncode[attr_to_int[word]] != 0:
                             base = predicatesEncode[attr_to_int[word]]
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.IN, paramlist)
-                        if predicatesEncode[attr_to_int[word]] == 7.453230975627935e-06:
-                            fuck_str.append(word)
 
-            else:
-                print(temp)
+            # FIXME: 对LIKE, NOT LIKE 谓词简单赋值
+            elif "LIKE" in temp:
+                index = temp.index("LIKE")
+                paramlist = []
+                not_like = False
+                if temp[index - 1] == "NOT":
+                    not_like = True
+                    table = temp[index - 2].split('.')[0].replace("(","")
+                else:
+                    table = temp[index - 1].split('.')[0].replace("(","")
+                tablename = short_to_long(table)
+                param = temp[index + 1]
+                if param[0] == "'":
+                    param = param[1:-1]
+                paramlist.append(param)
                 for word in temp:
                     if '.' in word:
                         if word[0] == "'":
                             continue
                         word = filter(word)
-                        predicatesEncode[attr_to_int[word]] = 1
+                        base = 1
+                        if predicatesEncode[attr_to_int[word]] != 0:
+                            base = predicatesEncode[attr_to_int[word]]
+                        if not_like:
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.NOT_LIKE, paramlist)
+                        else:
+                            
+                            predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LIKE, paramlist)
+
+            else:
+                print("BAD EXPRESSION",temp)
+                exit()
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
         queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
@@ -403,23 +407,23 @@ def getQueryEncode(attrNames):
     conn.close()
 
     print("done")
-    print(fuck_str)
 
 
-# 处理属性列，将(A.a1... 或 A.a1; 处理为A.a1
+# 处理属性列单词，将(A.a1... 或 A.a1; 处理为A.a1
 def filter(word):
-    # 剪切掉左括号符号（不会出现含右括号的情况）
+    # 剪切掉左括号符号(不会出现含右括号的情况)
     if word[0] == '(':
         word = word[1:]
-    # 剪切掉分号（sql语句末尾）
+    # 剪切掉分号(sql语句末尾)
     if word[-1] == ';':
         word = word[:-1]
 
     return word
 
 
+# 获取属性列上的选择率
 def getAttributionProportion(tablename, attname, predicate, paramlist):
-    print(tablename,attname,paramlist)
+    # print(tablename,attname,paramlist)
     sql = '''
     SELECT null_frac,
            n_distinct,
@@ -439,7 +443,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         most_common_freqs = row[3] # list
         histogram_bounds = res_split(row[4]) # list,不包含most_common_val的统计
     
-    # 不同值的个数的比值的负数
+    # 不同值的个数的比值的负数，查询系统表pg_class获取行数估计
     if n_distinct < 0:
         sql = '''
         SELECT reltuples
@@ -447,14 +451,15 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         WHERE relkind = 'r' AND relname = '%s';
         ''' % (tablename)
         cur.execute(sql)
-        rows = cur.fetchall()
+        rows = cur.fetchall() # 这个查询只返回一行数据
 
         for row in rows:
             n_distinct = int(row[0] * (-n_distinct))
 
     selectivity = 0.0
+
     # 针对不同谓词情况分别计算选择率
-    # FIXME: LIKE/NOT LIKE谓词暂未处理
+    # FIXME: 'LIKE', 'NOT LIKE'谓词暂未处理
     if predicate == Predicate.EQ or predicate == Predicate.NEQ:
         param = paramlist[0]
         sum_of_most_common_freqs = 0.0
@@ -488,12 +493,6 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             selectivity = 1 - index / num_buckets
         else:
             selectivity = index / num_buckets
-        
-    elif predicate == Predicate.LIKE:
-        selectivity = 0.1
-
-    elif predicate == Predicate.NOT_LIKE:
-        selectivity = 0.1
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
@@ -508,8 +507,8 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         index2 = 0
         num_buckets = len(histogram_bounds) - 1
         # 查找直方图，统计begin和end参数之间的buckt数
-        for val in histogram_bounds:
-            if operator.le(begin, val):
+        while index1 < num_buckets:
+            if operator.le(begin, histogram_bounds[index1]):
                 break
             index1 = index1 + 1
         index2 = index1 + 1
@@ -522,7 +521,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         else:
             selectivity = 1 - (index2 - index1) / num_buckets
         
-    elif predicate == Predicate.IN:
+    elif predicate == Predicate.IN or predicate == Predicate.NOT_IN:
         sum_of_most_common_freqs = 0.0
         # 计算所有最常值的频率
         if most_common_freqs is not None:
@@ -546,26 +545,34 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             # 若不在最常值中，则累加标准选择率
             if not flag:
                 selectivity = selectivity + normal_selectivity
+        if predicate == Predicate.NOT_IN:
+            selectivity = 1 - selectivity
+        
+    elif predicate == Predicate.LIKE:
+        selectivity = 0.1
+
+    elif predicate == Predicate.NOT_LIKE:
+        selectivity = 0.1
 
     else:
         print('BAD PREDICATE' + str(predicate))
-        sys.exit()
+        exit()
 
     return selectivity
 
 
+# 分割直方图信息字符串
 def res_split(resStr):
     '''
     pg数据库查询pg_stats表返回结果中，most_commoin_vals 和 histogram_bounds的返回结果
-    是一整行的字符串，需要进行分割得到期望的list，分隔符是: ,
+    是一整行的字符串，需要进行分割得到期望的list，分隔符是: ','
     注意以下几种特殊情况：
-    1. 返回结果对包含空格的字符串添加的双引号，需要去除
+    1. 返回结果对包含空格及分隔符的字符串添加的双引号，需要去除
     2. 返回结果中双引号包含转义字符 \ 来转移双引号
-    3. 某个字符串中可能包含','，因此不能简单地用','分割，这里用扫描字符串的形式
     流程如下：
     从前往后扫描，若是双引号，则表明一个单词的开始，接着扫描到下一个双引号且前驱不是'\'的时候结束
     (当单词内包含空格或不是分隔符含义的','时需要双引号括起来)
-    若不是双引号，则扫描到下一个','时得到一个单词
+    若不是双引号，则扫描到下一个','时结束
     '''
     res = []
     if resStr is not None:
@@ -579,7 +586,6 @@ def res_split(resStr):
                 while end < len(resStr):
                     # 以双引号结束，表示一个单词的完整出现
                     if resStr[end] == '"' and resStr[end - 1] != '\\':
-                        print(resStr[begin + 1 : end],begin + 1,end,len(resStr))
                         res.append(resStr[begin + 1 : end]) # 去掉双引号，并将单词加入list
                         begin = end + 1
                         if begin < len(resStr) and resStr[begin] == ',':
@@ -593,7 +599,6 @@ def res_split(resStr):
                 end = begin + 1
                 while end < len(resStr):
                     if resStr[end] == ',':
-                        print(resStr[begin : end],begin,end,len(resStr))
                         res.append(resStr[begin : end])
                         begin = end + 1
                         break
@@ -601,15 +606,14 @@ def res_split(resStr):
                         end = end + 1
                 # 最后一个情况特殊处理，因为没有逗号结尾了
                 if end == len(resStr):
-                    print(resStr[begin : end],begin,end,len(resStr))
                     res.append(resStr[begin : end])
                     begin = end + 1
-    print('split done')
+    # print('split done')
     return res
 
 
 if __name__ == '__main__':
-    getResource()
+    # getResource()
     attrNames = getQueryAttributions()
     getQueryEncode(attrNames)
 
