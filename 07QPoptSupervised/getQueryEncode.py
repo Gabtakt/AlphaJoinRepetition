@@ -346,6 +346,7 @@ def getQueryEncode(attrNames):
                         paramlist.append(param[1:-2])
                         if param[len(param) - 1] == ")":
                             i = j
+                            print('fix i:',i)
                             break
                 else:
                     if param[0] == "'":
