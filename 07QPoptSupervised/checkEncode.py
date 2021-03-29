@@ -21,9 +21,11 @@ def checkEncode():
         V2 = encodeDict2[K]
         for i in range(0,len(V)):
             if V[i] != 0:
-                assert(V2[i] != 0)
+                if V2[i] == 0:
+                    print('diff here.',K,V,V2,i)
             if V2[i] != 0:
-                assert(V[i] != 0)
+                if V[i] == 0:
+                    print('diff here.',K,V,V2,i)
 
     # print(encodeDict1)
     # print(encodeDict2)
