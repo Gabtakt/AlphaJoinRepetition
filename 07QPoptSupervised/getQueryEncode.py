@@ -507,7 +507,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         else:
             selectivity = p * (1.0 * index) / num_buckets
         if attname == 'episode_nr':
-            print('select episode_nr',selectivity,predicate,param,p)
+            print('select episode_nr',selectivity,predicate,param,p,index)
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
