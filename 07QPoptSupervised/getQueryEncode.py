@@ -492,6 +492,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         sum_of_most_common_freqs = 0.0
         for val in most_common_freqs:
             sum_of_most_common_freqs = sum_of_most_common_freqs + val
+        p = 1.0 - sum_of_most_common_freqs - null_frac
         # 查找直方图信息，找到参数所在的bucket的index
         index = 0
         num_buckets = len(histogram_bounds) - 1
@@ -502,11 +503,11 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         if index != 0:
             index = index - 1
         if predicate == Predicate.BG or predicate == Predicate.BGE:
-            selectivity = ((1.0 - sum_of_most_common_freqs - null_frac)) * (1.0 - index * 1.0 / num_buckets)
+            selectivity = p * (1.0 - index * 1.0 / num_buckets)
         else:
-            selectivity = ((1.0 - sum_of_most_common_freqs - null_frac)) * (1.0 * index) / num_buckets
+            selectivity = p * (1.0 * index) / num_buckets
         if attname == 'episode_nr':
-            print('select episode_nr',selectivity,predicate,param)
+            print('select episode_nr',selectivity,predicate,param,p)
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
