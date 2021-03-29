@@ -343,10 +343,10 @@ def getQueryEncode(attrNames):
                     paramlist.append(param)
                     for j in range(i + 1, len(file_context)):
                         strList = file_context[j].split()
-                        print(strList)
                         param = ""
                         for val in strList:
                             param = param + val + " "
+                        print(param)
                         param = param[:-1]
                         if param[len(param) - 1] == ")":
                             paramlist.append(param[1:-2])
