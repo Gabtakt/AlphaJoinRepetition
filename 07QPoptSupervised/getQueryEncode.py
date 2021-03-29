@@ -346,7 +346,6 @@ def getQueryEncode(attrNames):
                         param = ""
                         for val in strList:
                             param = param + val + " "
-                        print(param)
                         param = param[:-1]
                         if param[len(param) - 1] == ")":
                             paramlist.append(param[1:-2])
