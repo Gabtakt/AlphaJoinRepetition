@@ -502,8 +502,9 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             if operator.le(param, val):
                 break
             index = index + 1
-        index = min(index, num_buckets)
         if predicate == Predicate.BG or predicate == Predicate.BGE:
+            if index != 0:
+                index = index - 1
             selectivity = p * (1 - index / num_buckets)
         else:
             selectivity = p * index / num_buckets
