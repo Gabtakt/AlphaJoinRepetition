@@ -6,7 +6,7 @@ import torch
 import pickle
 from models import ValueNet
 
-shortToLongPath = '../resource/shorttolong'
+shortToLongPath = '../resource/shorttolong' # 表名缩写到全名的映射，共21个
 predicatesEncodeDictPath = './predicatesEncodedDict'  # 查询的编码
 
 
@@ -152,15 +152,17 @@ class supervised:
             state_tensor = torch.tensor(state, dtype=torch.float32)
 
             predictionRuntime = self.actor_net(state_tensor)
+
             label = [0 for _ in range(self.num_output)]
             label[self.dataList[index].label] = 1
-            label_tensor = torch.tensor(label, dtype=torch.float32)
 
-            #loss = loss_func(predictionRuntime, label_tensor)
+            # label_tensor = torch.tensor(label, dtype=torch.float32)
+            # loss = loss_func(predictionRuntime, label_tensor)
+            
             temp = []
             temp.append(self.dataList[index].label)
-            print(torch.tensor(temp, dtype=torch.float32))
-            print(predictionRuntime)
+            # print(torch.tensor(temp, dtype=torch.float32))
+            # print(predictionRuntime)
             loss = loss_func(predictionRuntime.view(1,5), torch.tensor(temp, dtype=torch.long))
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
