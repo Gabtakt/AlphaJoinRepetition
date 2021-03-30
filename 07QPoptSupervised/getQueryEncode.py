@@ -278,7 +278,7 @@ def getQueryEncode(attrNames):
                         predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LE, numstrList2numList(paramlist))
 
             # 处理 'BETWEEN ... AND ...' 谓词
-            # FIXME: 没有添加NOT BETWEEN的识别，113条sql语句中没有
+            # FIXME: 没有添加'NOT BETWEEN'的识别，113条sql语句中没有
             elif "BETWEEN" in temp:
                 index = temp.index("BETWEEN")
                 paramlist = []
@@ -397,7 +397,7 @@ def getQueryEncode(attrNames):
                             predicatesEncode[attr_to_int[word]] = base * getAttributionProportion(tablename, word.split('.')[1], Predicate.LIKE, paramlist)
 
             else:
-                print("BAD EXPRESSION",queryName,temp)
+                print("BAD EXPRESSION:",queryName,temp)
             i = i + 1
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
@@ -473,15 +473,16 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         sum_of_most_common_freqs = 0.0
         # 查找最常值，若参数在最常值中，则直接返回其频率作为选择率
         index = 0
-        for val in most_common_vals:
-            sum_of_most_common_freqs += most_common_freqs[index]
-            if operator.eq(val, param):
-                if predicate == Predicate.EQ:
-                    selectivity = most_common_freqs[index]
-                else:
-                    selectivity = 1 - most_common_freqs[index]
-                return selectivity
-            index = index + 1
+        if most_common_vals is not None:
+            for val in most_common_vals:
+                sum_of_most_common_freqs += most_common_freqs[index]
+                if operator.eq(val, param):
+                    if predicate == Predicate.EQ:
+                        selectivity = most_common_freqs[index]
+                    else:
+                        selectivity = 1 - most_common_freqs[index]
+                    return selectivity
+                index = index + 1
         p = 1.0 - sum_of_most_common_freqs - null_frac
         if predicate == Predicate.EQ:
             selectivity = p / (n_distinct - len(most_common_vals))
@@ -501,12 +502,11 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
             if operator.le(param, val):
                 break
             index = index + 1
-        if index != 0:
-            index = index - 1
+        index = min(index, num_buckets)
         if predicate == Predicate.BG or predicate == Predicate.BGE:
-            selectivity = p * (1.0 - index * 1.0 / num_buckets)
+            selectivity = p * (1 - index / num_buckets)
         else:
-            selectivity = p * (1.0 * index) / num_buckets
+            selectivity = p * index / num_buckets
 
     elif predicate == Predicate.IS_NULL:
         selectivity = null_frac
@@ -544,8 +544,6 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
 
         # 标准选择率，与等值过滤的选择率相同
         normal_selectivity = (1 - sum_of_most_common_freqs) / (n_distinct - len(most_common_vals))
-        if tablename == 'kind_type' :
-            print(paramlist[0])
 
         # 查找参数列表中每个参数是否在最常值中
         for param in paramlist:
@@ -571,8 +569,7 @@ def getAttributionProportion(tablename, attname, predicate, paramlist):
         selectivity = 0.1
 
     else:
-        print('BAD PREDICATE' + str(predicate))
-        exit()
+        print('BAD PREDICATE:' + str(predicate))
 
     return selectivity
 
