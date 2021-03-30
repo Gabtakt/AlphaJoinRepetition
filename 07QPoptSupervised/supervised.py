@@ -161,7 +161,7 @@ class supervised:
             temp.append(self.dataList[index].label)
             print(torch.tensor(temp, dtype=torch.float32))
             print(predictionRuntime)
-            loss = loss_func(predictionRuntime, torch.tensor(temp, dtype=torch.float32))
+            loss = loss_func(predictionRuntime.view(1,5), torch.tensor(temp, dtype=torch.long))
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
             optim.step()  # 应用梯度，并更新参数
