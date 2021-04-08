@@ -7,7 +7,7 @@ import time
 
 queryEncodeDictPath = './queryEncodedDict'  # 查询的编码
 predicatesEncodeDictPath = './predicatesEncodedDict' # 谓词的编码
-shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共39个
+shorttolongpath = '../resource/shorttolong'  # 表的缩写到全名的映射，共28个
 tablenamedir = '../resource/jobtablename'  # imdb的113条查询语句对应的查询表名（缩写）
 querydir = "../resource/jobquery" # imdb的113条查询语句
 
