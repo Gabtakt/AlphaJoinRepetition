@@ -15,3 +15,4 @@ if __name__ == '__main__':
 
         ddpg_trainer.supervised()
         ddpg_trainer.test_network()
+        
