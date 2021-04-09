@@ -16,8 +16,10 @@ predictionNet.load_state_dict(torch.load(model_path, map_location=lambda storage
 predictionNet.eval()
 
 
+# 根据价值网络的输出计算其奖励
 def getReward(state):
     inputState = torch.tensor(state.predicatesEncode + state.board, dtype=torch.float32)
+    # 仅根据编码输入计算输出，不更新梯度
     with torch.no_grad():
         predictionRuntime = predictionNet(inputState)
     prediction = predictionRuntime.detach().cpu().numpy()
@@ -26,6 +28,7 @@ def getReward(state):
     return reward
 
 
+# 默认策略: 随机选择一个节点进行拓展
 def randomPolicy(state):
     while not state.isTerminal():
         try:
@@ -34,7 +37,6 @@ def randomPolicy(state):
         except IndexError:
             raise Exception("Non-terminal state has no possible actions: " + str(state))
         state = state.takeAction(action)
-    # reward = state.getReward()
     reward = getReward(state)
     # print(reward)
     return reward
@@ -42,15 +44,16 @@ def randomPolicy(state):
 
 class treeNode():
     def __init__(self, state, parent):
-        self.state = state
-        self.isTerminal = state.isTerminal()
-        self.isFullyExpanded = self.isTerminal
-        self.parent = parent
-        self.numVisits = 0
-        self.totalReward = 0
-        self.children = {}
+        self.state = state # 保存树的状态结构，state的定义在findBestPlan中PlanState
+        self.isTerminal = state.isTerminal() # 表示该节点是否达到终止状态
+        self.isFullyExpanded = self.isTerminal # 表示该节点是否已完全拓展
+        self.parent = parent # 父节点
+        self.numVisits = 0 # 记录节点访问次数
+        self.totalReward = 0 # 记录节点奖励值，与numVisit一起用于UCT算法以平衡探索和利用
+        self.children = {} # 子节点列表
 
 
+# 蒙特卡洛树搜索
 class mcts():
     def __init__(self, timeLimit=None, iterationLimit=None, explorationConstant=1 / math.sqrt(2),
                  rolloutPolicy=randomPolicy):
