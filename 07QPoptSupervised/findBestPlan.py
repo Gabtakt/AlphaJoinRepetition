@@ -63,7 +63,7 @@ class planState:
         newState.joinMartix[action.y * self.tableNumber + action.x] = 0
         ma = max(action.x, action.y)
         mi = min(action.x, action.y)
-        # FIXME： 这一步没看懂
+        # 这一步转移连接，例如A,B连接后，所有与B连接的表，全部转移到与A连接 
         for i in range(self.tableNumber):
             if newState.joinMartix[i * self.tableNumber + ma] == 1:
                 newState.joinMartix[i * self.tableNumber + ma] = 0
