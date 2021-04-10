@@ -10,7 +10,7 @@ from models import ValueNet
 import torch
 model_path = './saved_models/supervised.pt'
 
-# 把价值网络放在这里,不用每个状态都保存一个网络
+# 加载预先训练好的价值网络
 predictionNet = ValueNet(856, 5)
 predictionNet.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 predictionNet.eval()
@@ -19,11 +19,13 @@ predictionNet.eval()
 # 根据价值网络的输出计算其奖励
 def getReward(state):
     inputState = torch.tensor(state.predicatesEncode + state.board, dtype=torch.float32)
+    print(inputState)
     # 仅根据编码输入计算输出，不更新梯度
     with torch.no_grad():
         predictionRuntime = predictionNet(inputState)
     prediction = predictionRuntime.detach().cpu().numpy()
     maxindex = np.argmax(prediction)
+    # FIXME:这里为什么是用10减而不是5减
     reward = 10 - maxindex
     return reward
 
@@ -50,7 +52,7 @@ class treeNode():
         self.parent = parent # 父节点
         self.numVisits = 0 # 记录节点访问次数
         self.totalReward = 0 # 记录节点奖励值，与numVisit一起用于UCT算法以平衡探索和利用
-        self.children = {} # 子节点列表
+        self.children = {} # 子节点列表，是Planstate到treeNode的字典
 
 
 # 蒙特卡洛树搜索
@@ -74,6 +76,7 @@ class mcts():
         self.explorationConstant = explorationConstant
         self.rollout = rolloutPolicy
 
+    # 从根节点开始进行搜索，根据限制类型的不同调用executeRound()进行搜索
     def search(self, initialState):
         self.root = treeNode(initialState, None)
 
@@ -88,12 +91,14 @@ class mcts():
         bestChild = self.getBestChild(self.root, 0)
         return self.getAction(self.root, bestChild)
 
+    # 对选择的节点进行快速rollout，获取收益后，调用backpropogate()进行反向传播
     def executeRound(self):
         node = self.selectNode(self.root)
         newState = deepcopy(node.state)
         reward = self.rollout(newState)
         self.backpropogate(node, reward)
 
+    # 选择当前节点的一个子节点，若已完全拓展则选择最佳子节点，否则进行拓展
     def selectNode(self, node):
         while not node.isTerminal:
             if node.isFullyExpanded:
@@ -102,6 +107,7 @@ class mcts():
                 return self.expand(node)
         return node
 
+    # 获取当前节点所有可能的子节点进行拓展
     def expand(self, node):
         actions = node.state.getPossibleActions()
         for action in actions:
@@ -116,15 +122,18 @@ class mcts():
 
         raise Exception("Should never reach here")
 
+    # 对当前路径上所有节点进行反向传播，更新参数
     def backpropogate(self, node, reward):
         while node is not None:
             node.numVisits += 1
             node.totalReward += reward
             node = node.parent
 
+    # 获取当前节点的最佳子节点，根据UCT算法进行选择
     def getBestChild(self, node, explorationValue):
         bestValue = float("-inf")
         bestNodes = []
+        # 计算每个子节点的价值，选择价值最大的子节点
         for child in node.children.values():
             nodeValue = child.totalReward / child.numVisits + explorationValue * math.sqrt(
                 2 * math.log(node.numVisits) / child.numVisits)
@@ -135,6 +144,7 @@ class mcts():
                 bestNodes.append(child)
         return random.choice(bestNodes)
 
+    # 返回最佳子节点的PlanState实例
     def getAction(self, root, bestChild):
         for action, node in root.children.items():
             if node is bestChild:

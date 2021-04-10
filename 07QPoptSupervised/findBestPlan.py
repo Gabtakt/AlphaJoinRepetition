@@ -146,17 +146,16 @@ def findBestPlan():
 
     searchtime = 0
     for i in range(5) :
-        searchtime += 5
+        searchtime += 5 # 搜索因子
         print(searchtime)
         for queryName in queryNameList:
 
-            # 閼惧嘲褰囬弻銉嚄閻ㄥ嫯銆冮惃鍒瞚st
+            # 获取查询语句的表名缩写列表
             tablenamepath = tablenamedir + "/" + queryName
             file_object = open(tablenamepath)
             file_context = file_object.read()
             tableList = eval(file_context)
             file_object.close()
-
 
             mct = mcts(iterationLimit=(int)(len(tableList) *  searchtime))
             initialState = planState(totalNumberOfTables, len(tableList), queryEncodeDict[queryName],
