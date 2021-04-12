@@ -63,7 +63,7 @@ class planState:
         newState.joinMartix[action.y * self.tableNumber + action.x] = 0
         ma = max(action.x, action.y)
         mi = min(action.x, action.y)
-        # FIXME： 这一步没看懂
+        # 这一步转移连接，例如A,B连接后，所有与B连接的表，全部转移到与A连接 
         for i in range(self.tableNumber):
             if newState.joinMartix[i * self.tableNumber + ma] == 1:
                 newState.joinMartix[i * self.tableNumber + ma] = 0
@@ -118,25 +118,27 @@ def getCost(sql):
     return origin_cost
 
 
+# 将某个查询语句选择出来的连接顺序编码进行译码，翻译为pg-hint可接受的括号形式
 def decode(currentState, tableList):
     tempdect = {}
     for i in range(len(tableList)):
         tempdect[tableList[i]] = tableList[i]
 
-    correctcount = 0  # 鐠佹澘缍嶆潻鐐村复閻ㄥ嫭鏆熼柌锟?
+    correctcount = 0
     while correctcount != len(tableList) - 1:
-        index = currentState.board.index(max(currentState.board))  # 濮瑰倸娼楅弽锟?
+        index = currentState.board.index(max(currentState.board))
         indexa = int(index / currentState.tableNumber)
         indexb = int(index % currentState.tableNumber)
         currentState.board[index] = 0
 
         string = "( " + tempdect[intToTable[indexa]] + " " + tempdect[intToTable[indexb]] + " )"
         correctcount += 1
-        # 閺囧瓨鏌婄€涙鍚€
+        # 将中间结果放回字典中
         for j in string.split():
             if j in tableList:
                 tempdect[j] = string
 
+    # 最终字典中所有value都是完整的pg-hint形式连接顺序
     return tempdect[tableList[0]]
 
 
@@ -146,17 +148,16 @@ def findBestPlan():
 
     searchtime = 0
     for i in range(5) :
-        searchtime += 5
+        searchtime += 5 # 搜索因子
         print(searchtime)
         for queryName in queryNameList:
 
-            # 閼惧嘲褰囬弻銉嚄閻ㄥ嫯銆冮惃鍒瞚st
+            # 获取查询语句的表名缩写列表
             tablenamepath = tablenamedir + "/" + queryName
             file_object = open(tablenamepath)
             file_context = file_object.read()
             tableList = eval(file_context)
             file_object.close()
-
 
             mct = mcts(iterationLimit=(int)(len(tableList) *  searchtime))
             initialState = planState(totalNumberOfTables, len(tableList), queryEncodeDict[queryName],
@@ -166,7 +167,6 @@ def findBestPlan():
             start2 = time.clock()
             while currentState.currentStep != 1:
                 action = mct.search(initialState=currentState)
-                # print(action)
                 currentState = currentState.takeAction(action)
             elapsed = (time.time() - start) * 1000
             elapsed2  = (time.clock() - start2) * 1000 / 96 
