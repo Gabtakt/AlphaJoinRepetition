@@ -22,6 +22,8 @@ class supervised:
         self.num_output = 5  # 网络输出的向量的维度
         self.args = args
         self.right = 0
+        self.dataList = []
+        self.testList = []
 
         # build up the network
         self.actor_net = ValueNet(self.num_inputs, self.num_output)
@@ -32,7 +34,7 @@ class supervised:
         if not os.path.exists(self.args.save_dir):
             os.mkdir(self.args.save_dir)
 
-        # 读取字典-predicatesEncoded编码
+        # 读取predicatesEncoded编码
         f = open(predicatesEncodeDictPath, 'r')
         a = f.read()
         self.predicatesEncodeDict = eval(a)
@@ -51,8 +53,6 @@ class supervised:
         for i in range(len(tables)):
             self.table_to_int[tables[i]] = i
 
-        self.dataList = []
-        self.testList = []
 
     def load_data(self):
         if self.dataList.__len__() != 0:
@@ -81,12 +81,17 @@ class supervised:
         # 对查询计划编码
         matrix = np.mat(np.zeros((28, 28)))
         stack = []
-        chazhi = 0
+        step = 0
+        # 按照hint的格式，每次连接结果由一对括号包围，最开始的连接的连接结果(即单表)没有括号
+        # 可按下公式计算表的数量
+        num_table = (len(tablesInQuery) + 2) / 3
         for i in tablesInQuery:
             if i == ')':
                 tempb = stack.pop()
                 tempa = stack.pop()
+                # 弹出左括号
                 _ = stack.pop()
+                # 分割得到已进行连接的表
                 b = tempb.split('+')
                 a = tempa.split('+')
                 # 排序以后取用左边编号最小的那个表作为代表
@@ -94,10 +99,11 @@ class supervised:
                 a.sort()
                 indexb = self.table_to_int[b[0]]
                 indexa = self.table_to_int[a[0]]
-                matrix[indexa, indexb] = (len(tablesInQuery) + 2) / 3 - chazhi
-                chazhi += 1
+                # 记录本次连接次序
+                matrix[indexa, indexb] = num_table - step
+                step += 1
+                # 用'+'表示已进行连接
                 stack.append(tempa + '+' + tempb)
-                # print(stack)
             else:
                 stack.append(i)
         return matrix
@@ -148,12 +154,13 @@ class supervised:
         file_train.close()
 
     def supervised(self):
+        self.load_data()
         optim = torch.optim.SGD(self.actor_net.parameters(), lr=0.001)
 
-        #loss_func = torch.nn.CrossEntropyLoss()
-        loss_func = torch.nn.BCEWithLogitsLoss()
+        # loss_func = torch.nn.CrossEntropyLoss()
+        # loss_func = torch.nn.BCEWithLogitsLoss()
         # loss_func = torch.nn.MSELoss()
-        # loss_func = torch.nn.NLLLoss()
+        loss_func = torch.nn.NLLLoss()
 
         loss1000 = 0
         count = 0
@@ -165,14 +172,14 @@ class supervised:
 
             predictionRuntime = self.actor_net(state_tensor) # 网络预测输出
 
-            temp = [0 for i in range(self.num_output)]
-            temp[self.dataList[index].label] = 1
-            label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
+            # temp = [0 for i in range(self.num_output)]
+            # temp[self.dataList[index].label] = 1
+            # label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
 
-            # temp = [self.dataList[index].label]
-            # label_tensor = torch.tensor(temp, dtype=torch.float32)
+            temp = [self.dataList[index].label]
+            label_tensor = torch.tensor(temp, dtype=torch.long)
 
-            loss = loss_func(predictionRuntime, label_tensor)
+            loss = loss_func(predictionRuntime.view(1,5), label_tensor)
 
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
@@ -191,12 +198,9 @@ class supervised:
     # functions to test the network
     def test_network(self):
         self.load_data()
-        model_path = self.args.save_dir + 'supervised.pt'
+        model_path = self.args.save_dir + 'supervised15-693.13992.pt'
         self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
-        for parameter in self.actor_net.parameters():
-            print(parameter)
-
 
         correct = 0
         for step in range(self.testList.__len__()):
@@ -207,7 +211,6 @@ class supervised:
             prediction = predictionRuntime.detach().cpu().numpy()
             maxindex = np.argmax(prediction)
             label = self.testList[step].label
-            #print(prediction, maxindex, "\t", label)
             if maxindex == label:
                 correct += 1
         print(correct, self.testList.__len__(), correct/self.testList.__len__(), end=' ')
@@ -218,23 +221,20 @@ class supervised:
             state_tensor = torch.tensor(state, dtype=torch.float32)
 
             predictionRuntime = self.actor_net(state_tensor)
-            # prediction = predictionRuntime.detach().cpu().numpy()[0]
             prediction = predictionRuntime.detach().cpu().numpy()
             maxindex = np.argmax(prediction)
             label = self.dataList[step].label
-            #print(maxindex, "\t", label)
             if maxindex == label:
                 correct1 += 1
         print(correct1, self.dataList.__len__(), correct1/self.dataList.__len__())
-        # if abs(correct / self.testList.__len__() -  self.right) < 0.001:
-        #    sys.exit()
+
         self.right = correct / self.testList.__len__()
+
 
     def test_hintcost(self, queryName, hint):
         model_path = self.args.save_dir + 'supervised.pt'
 
-        self.actor_net.load_state_dict(torch.load(
-            model_path, map_location=lambda storage, loc: storage))
+        self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
 
         matrix = self.hint2matrix(hint)
