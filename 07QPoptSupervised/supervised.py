@@ -6,8 +6,8 @@ import torch
 import pickle
 from models import ValueNet
 
-shortToLongPath = '../resource/shorttolong' # 表名缩写到全名的映射，共21个
-predicatesEncodeDictPath = './predicatesEncodedDict'  # 查询的编码
+shortToLongPath = '../resource/shorttolong' # 表名缩写到全名的映射，共28个
+predicatesEncodeDictPath = './predicatesEncodedDict'  # 谓词的编码
 
 
 class data:
@@ -16,14 +16,12 @@ class data:
         self.time = time
         self.label = 0
 
-
 class supervised:
     def __init__(self, args):
         self.num_inputs = 856  # 预测网络输入的向量的维度
         self.num_output = 5  # 网络输出的向量的维度
         self.args = args
         self.right = 0
-
 
         # build up the network
         self.actor_net = ValueNet(self.num_inputs, self.num_output)
@@ -55,6 +53,27 @@ class supervised:
 
         self.dataList = []
         self.testList = []
+
+    def load_data(self):
+        if self.dataList.__len__() != 0:
+            return
+        testpath = "./data/testdata.sql"
+        file_test = open(testpath, 'rb')
+        l = pickle.load(file_test)
+        for _ in range(l):
+            self.testList.append(pickle.load(file_test))
+        file_test.close()
+
+        trainpath = "./data/traindata.sql"
+        file_train = open(trainpath, 'rb')
+        l = pickle.load(file_train)
+        for _ in range(l):
+            self.dataList.append(pickle.load(file_train))
+        file_train.close()
+
+    def print_data(self):
+        for i in range(len(self.dataList)):
+            print(self.dataList[i].state)
 
     def hint2matrix(self, hint):
         # 解构query plan
@@ -107,13 +126,13 @@ class supervised:
         self.dataList.sort(key=lambda x: x.time, reverse=False)
         for i in range(self.dataList.__len__()):
             self.dataList[i].label = int(i / (self.dataList.__len__() / self.num_output + 1))
-            # print(self.dataList[i].label)
+            print(self.dataList[i].label)
         for i in range(int(self.dataList.__len__() * 0.3)):
             index = random.randint(0, len(self.dataList) - 1)
             temp = self.dataList.pop(index)
             self.testList.append(temp)
 
-        print("size of test set:", len(self.testList), "\tsize of train set:", len(self.dataList))
+        print("size of test set:", len(self.testList),"\tsize of train set:", len(self.dataList))
         testpath = "./data/testdata.sql"
         file_test = open(testpath, 'wb')
         pickle.dump(len(self.testList), file_test)
@@ -129,51 +148,45 @@ class supervised:
         file_train.close()
 
     def supervised(self):
+        optim = torch.optim.SGD(self.actor_net.parameters(), lr=0.001)
 
-        #model_path = self.args.save_dir + 'supervised.pt'
-        #self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-        #self.actor_net.eval()
+        #loss_func = torch.nn.CrossEntropyLoss()
+        loss_func = torch.nn.BCEWithLogitsLoss()
+        # loss_func = torch.nn.MSELoss()
+        # loss_func = torch.nn.NLLLoss()
 
-        self.load_data()
-
-        optim = torch.optim.SGD(self.actor_net.parameters(), lr=0.01)
-        #loss_func = torch.nn.MSELoss()
-        loss_func = torch.nn.CrossEntropyLoss()
         loss1000 = 0
         count = 0
 
-        # starttime = datetime.now()
         for step in range(1, 1600001):
-            #self.test_network()
-            #print(datetime.now())
-            #continue
             index = random.randint(0, len(self.dataList) - 1)
             state = self.dataList[index].state
             state_tensor = torch.tensor(state, dtype=torch.float32)
 
-            predictionRuntime = self.actor_net(state_tensor)
+            predictionRuntime = self.actor_net(state_tensor) # 网络预测输出
 
-            label = [0 for _ in range(self.num_output)]
-            label[self.dataList[index].label] = 1
+            temp = [0 for i in range(self.num_output)]
+            temp[self.dataList[index].label] = 1
+            label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
 
-            # label_tensor = torch.tensor(label, dtype=torch.float32)
-            # loss = loss_func(predictionRuntime, label_tensor)
-            
-            temp = []
-            temp.append(self.dataList[index].label)
-            # print(torch.tensor(temp, dtype=torch.float32))
-            # print(predictionRuntime)
-            loss = loss_func(predictionRuntime.view(1,5), torch.tensor(temp, dtype=torch.long))
+            # temp = [self.dataList[index].label]
+            # label_tensor = torch.tensor(temp, dtype=torch.float32)
+
+            loss = loss_func(predictionRuntime, label_tensor)
+
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
             optim.step()  # 应用梯度，并更新参数
+
             loss1000 += loss.item()
-            if step % 1000 == 0:
+            if step % 100000 == 0: # 每训练10000次，保存当前模型
+                torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised{:d}-{:.5f}.pt'.format(count, loss1000))
+                count = count + 1
+                # self.test_network()
+            if step % 1000 == 0:  # 每训练1000次，输出1000次训练的总损失
                 print('[{}]  Epoch: {}, Loss: {:.5f}'.format(datetime.now(), step, loss1000))
                 loss1000 = 0
-            if step % 100000 == 0:
-                torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised.pt')
-                #self.test_network()
+
 
     # functions to test the network
     def test_network(self):
@@ -181,6 +194,9 @@ class supervised:
         model_path = self.args.save_dir + 'supervised.pt'
         self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
+        for parameter in self.actor_net.parameters():
+            print(parameter)
+
 
         correct = 0
         for step in range(self.testList.__len__()):
@@ -191,10 +207,10 @@ class supervised:
             prediction = predictionRuntime.detach().cpu().numpy()
             maxindex = np.argmax(prediction)
             label = self.testList[step].label
-            #print(maxindex, "\t", label)
+            #print(prediction, maxindex, "\t", label)
             if maxindex == label:
                 correct += 1
-        print(correct, self.testList.__len__(), correct/self.testList.__len__(), end = ' ')
+        print(correct, self.testList.__len__(), correct/self.testList.__len__(), end=' ')
 
         correct1 = 0
         for step in range(self.dataList.__len__()):
@@ -210,14 +226,15 @@ class supervised:
             if maxindex == label:
                 correct1 += 1
         print(correct1, self.dataList.__len__(), correct1/self.dataList.__len__())
-        #if abs(correct / self.testList.__len__() -  self.right) < 0.001:
+        # if abs(correct / self.testList.__len__() -  self.right) < 0.001:
         #    sys.exit()
         self.right = correct / self.testList.__len__()
 
     def test_hintcost(self, queryName, hint):
         model_path = self.args.save_dir + 'supervised.pt'
 
-        self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
+        self.actor_net.load_state_dict(torch.load(
+            model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
 
         matrix = self.hint2matrix(hint)
@@ -230,20 +247,3 @@ class supervised:
         prediction = predictionRuntime.detach().cpu().numpy()
         maxindex = np.argmax(prediction)
         print(maxindex)
-
-    def load_data(self):
-        if self.dataList.__len__() != 0:
-            return
-        testpath = "./data/testdata.sql"
-        file_test = open(testpath, 'rb')
-        l = pickle.load(file_test)
-        for _ in range(l):
-            self.testList.append(pickle.load(file_test))
-        file_test.close()
-
-        trainpath = "./data/traindata.sql"
-        file_train = open(trainpath, 'rb')
-        l = pickle.load(file_train)
-        for _ in range(l):
-            self.dataList.append(pickle.load(file_train))
-        file_train.close()
