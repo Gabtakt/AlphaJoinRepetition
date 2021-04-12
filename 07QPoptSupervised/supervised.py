@@ -186,7 +186,7 @@ class supervised:
             optim.step()  # 应用梯度，并更新参数
 
             loss1000 += loss.item()
-            if step % 100000 == 0: # 每训练10000次，保存当前模型
+            if step % 100000 == 0: # 每训练100000次，保存当前模型
                 torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised{:d}-{:.5f}.pt'.format(count, loss1000))
                 count = count + 1
                 # self.test_network()
@@ -198,7 +198,7 @@ class supervised:
     # functions to test the network
     def test_network(self):
         self.load_data()
-        model_path = self.args.save_dir + 'supervised15-693.13992.pt'
+        model_path = self.args.save_dir + 'supervised.pt'
         self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
 

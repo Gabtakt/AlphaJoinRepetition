@@ -12,7 +12,7 @@ class ValueNet(nn.Module):
         self.layer3 = nn.Sequential(nn.Linear(512, 128), nn.ReLU(True))
         self.layer4 = nn.Sequential(nn.Linear(128, 32), nn.ReLU(True))
         # 最后输出层如果用ReLU,会导致很多参数为负值的地方变为0
-        self.layer5 = nn.Sequential(nn.Linear(32, out_dim), nn.Softmax(dim = 0))
+        self.layer5 = nn.Sequential(nn.Linear(32, out_dim), nn.LogSoftmax(dim = 0))
         # self.layer5 = nn.Sequential(nn.Linear(32, out_dim), nn.ReLU(True))
     
     def forward(self, x):
