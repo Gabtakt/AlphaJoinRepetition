@@ -155,7 +155,7 @@ class supervised:
 
     def supervised(self):
         self.load_data()
-        optim = torch.optim.SGD(self.actor_net.parameters(), lr=0.001)
+        optim = torch.optim.SGD(self.actor_net.parameters(), lr=self.args.critic_lr)
 
         # loss_func = torch.nn.CrossEntropyLoss()
         # loss_func = torch.nn.BCEWithLogitsLoss()
@@ -198,7 +198,7 @@ class supervised:
     # functions to test the network
     def test_network(self):
         self.load_data()
-        model_path = self.args.save_dir + 'supervised.pt'
+        model_path = self.args.save_dir + 'supervised15-569.90684.pt'
         self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
 

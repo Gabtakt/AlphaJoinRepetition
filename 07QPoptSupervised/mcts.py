@@ -8,7 +8,7 @@ from copy import deepcopy
 import numpy as np
 from models import ValueNet
 import torch
-model_path = './saved_models/supervised.pt'
+model_path = './saved_models/supervised15-569.90684.pt'
 
 # 加载预先训练好的价值网络
 predictionNet = ValueNet(856, 5)
@@ -19,7 +19,7 @@ predictionNet.eval()
 # 根据价值网络的输出计算其奖励
 def getReward(state):
     inputState = torch.tensor(state.predicatesEncode + state.board, dtype=torch.float32)
-    print(inputState)
+    # print(inputState)
     # 仅根据编码输入计算输出，不更新梯度
     with torch.no_grad():
         predictionRuntime = predictionNet(inputState)
