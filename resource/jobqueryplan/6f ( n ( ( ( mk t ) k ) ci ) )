@@ -1,0 +1,23 @@
+  ->  Nested Loop  (cost=8.22..15170.59 rows=5391 width=48) (actual time=76.834..789067.989 rows=785477 loops=1)
+        ->  Nested Loop  (cost=7.79..12716.03 rows=5391 width=37) (actual time=56.490..611063.431 rows=785477 loops=1)
+              Join Filter: (t.id = ci.movie_id)
+              ->  Nested Loop  (cost=7.23..12424.05 rows=147 width=41) (actual time=36.478..60990.527 rows=14165 loops=1)
+                    ->  Nested Loop  (cost=6.80..12291.81 rows=270 width=20) (actual time=26.891..10643.161 rows=35548 loops=1)
+                          ->  Seq Scan on keyword k  (cost=0.00..3632.40 rows=8 width=20) (actual time=3.811..97.915 rows=8 loops=1)
+                                Filter: ((keyword)::text = ANY ('{superhero,sequel,second-part,marvel-comics,based-on-comic,tv-special,fight,violence}'::text[]))
+                                Rows Removed by Filter: 134162
+                          ->  Bitmap Heap Scan on movie_keyword mk  (cost=6.80..1079.38 rows=305 width=8) (actual time=21.822..1314.724 rows=4444 loops=8)
+                                Recheck Cond: (keyword_id = k.id)
+                                Heap Blocks: exact=23488
+                                ->  Bitmap Index Scan on keyword_id_movie_keyword  (cost=0.00..6.72 rows=305 width=0) (actual time=18.443..18.443 rows=4444 loops=8)
+                                      Index Cond: (keyword_id = k.id)
+                    ->  Index Scan using title_pkey on title t  (cost=0.43..0.49 rows=1 width=21) (actual time=1.414..1.414 rows=0 loops=35548)
+                          Index Cond: (id = mk.movie_id)
+                          Filter: (production_year > 2000)
+                          Rows Removed by Filter: 1
+              ->  Index Scan using movie_id_cast_info on cast_info ci  (cost=0.56..1.52 rows=37 width=8) (actual time=3.392..38.793 rows=55 loops=14165)
+                    Index Cond: (movie_id = mk.movie_id)
+        ->  Index Scan using name_pkey on name n  (cost=0.43..0.46 rows=1 width=19) (actual time=0.225..0.225 rows=1 loops=785477)
+              Index Cond: (id = ci.person_id)
+Planning time: 382.987 ms
+Execution time: 790472.024 ms

@@ -1,0 +1,31 @@
+  ->  Gather  (cost=25833.65..25833.86 rows=2 width=64) (actual time=26768.504..26960.053 rows=3 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        ->  Partial Aggregate  (cost=24833.65..24833.66 rows=1 width=64) (actual time=26686.894..26686.894 rows=1 loops=3)
+              ->  Hash Join  (cost=2646.35..24832.54 rows=222 width=22) (actual time=1373.660..26681.230 rows=1567 loops=3)
+                    Hash Cond: (mk.keyword_id = k.id)
+                    ->  Nested Loop  (cost=3.29..22131.59 rows=22051 width=26) (actual time=183.237..26500.640 rows=670897 loops=3)
+                          ->  Nested Loop  (cost=2.86..18180.13 rows=2184 width=30) (actual time=20.541..19679.264 rows=98072 loops=3)
+                                ->  Hash Join  (cost=2.43..16096.36 rows=3156 width=9) (actual time=1.168..685.968 rows=149656 loops=3)
+                                      Hash Cond: (mi_idx.info_type_id = it.id)
+                                      ->  Parallel Seq Scan on movie_info_idx mi_idx  (cost=0.00..15122.68 rows=356624 width=13) (actual time=0.735..578.004 rows=285137 loops=3)
+                                            Filter: ((info)::text > '2.0'::text)
+                                            Rows Removed by Filter: 174874
+                                      ->  Hash  (cost=2.41..2.41 rows=1 width=4) (actual time=0.284..0.284 rows=1 loops=3)
+                                            Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                            ->  Seq Scan on info_type it  (cost=0.00..2.41 rows=1 width=4) (actual time=0.270..0.273 rows=1 loops=3)
+                                                  Filter: ((info)::text = 'rating'::text)
+                                                  Rows Removed by Filter: 112
+                                ->  Index Scan using title_pkey on title t  (cost=0.43..0.66 rows=1 width=21) (actual time=0.126..0.126 rows=1 loops=448969)
+                                      Index Cond: (id = mi_idx.movie_id)
+                                      Filter: (production_year > 1990)
+                                      Rows Removed by Filter: 0
+                          ->  Index Scan using movie_id_movie_keyword on movie_keyword mk  (cost=0.43..1.34 rows=47 width=8) (actual time=0.054..0.067 rows=7 loops=294217)
+                                Index Cond: (movie_id = t.id)
+                    ->  Hash  (cost=2626.12..2626.12 rows=1355 width=4) (actual time=61.762..61.762 rows=30 loops=3)
+                          Buckets: 2048  Batches: 1  Memory Usage: 18kB
+                          ->  Seq Scan on keyword k  (cost=0.00..2626.12 rows=1355 width=4) (actual time=5.546..61.721 rows=30 loops=3)
+                                Filter: ((keyword)::text ~~ '%sequel%'::text)
+                                Rows Removed by Filter: 134140
+Planning time: 290.291 ms
+Execution time: 26961.077 ms

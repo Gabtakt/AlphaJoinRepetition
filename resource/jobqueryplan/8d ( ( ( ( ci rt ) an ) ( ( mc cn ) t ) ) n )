@@ -1,0 +1,35 @@
+  ->  Gather  (cost=617027.10..617027.31 rows=2 width=64) (actual time=129801.352..129801.538 rows=3 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        ->  Partial Aggregate  (cost=616027.10..616027.11 rows=1 width=64) (actual time=128653.817..128653.817 rows=1 loops=3)
+              ->  Nested Loop  (cost=7340.80..615071.91 rows=191037 width=33) (actual time=16827.625..128523.475 rows=107668 loops=3)
+                    Join Filter: (n.id = an.person_id)
+                    ->  Nested Loop  (cost=7340.38..575812.29 rows=80693 width=25) (actual time=15961.665..121912.801 rows=95179 loops=3)
+                          ->  Nested Loop  (cost=7339.95..539301.51 rows=80693 width=16) (actual time=15952.641..76720.358 rows=95179 loops=3)
+                                ->  Hash Join  (cost=7339.52..502561.43 rows=80693 width=12) (actual time=15934.367..56566.169 rows=95179 loops=3)
+                                      Hash Cond: (mc.company_id = cn.id)
+                                      ->  Nested Loop  (cost=19.36..492129.44 rows=224314 width=16) (actual time=15580.934..56033.044 rows=264864 loops=3)
+                                            ->  Hash Join  (cost=18.93..443602.91 rows=85080 width=8) (actual time=15530.874..20267.983 rows=92134 loops=3)
+                                                  Hash Cond: (ci.role_id = rt.id)
+                                                  ->  Parallel Seq Scan on cast_info ci  (cost=0.00..403705.10 rows=15101810 width=12) (actual time=0.041..17235.485 rows=12081448 loops=3)
+                                                  ->  Hash  (cost=18.88..18.88 rows=4 width=4) (actual time=0.188..0.189 rows=1 loops=3)
+                                                        Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                        ->  Seq Scan on role_type rt  (cost=0.00..18.88 rows=4 width=4) (actual time=0.175..0.177 rows=1 loops=3)
+                                                              Filter: ((role)::text = 'costume designer'::text)
+                                                              Rows Removed by Filter: 11
+                                            ->  Index Scan using movie_id_movie_companies on movie_companies mc  (cost=0.43..0.52 rows=5 width=8) (actual time=0.308..0.387 rows=3 loops=276403)
+                                                  Index Cond: (movie_id = ci.movie_id)
+                                      ->  Hash  (cost=5932.46..5932.46 rows=84536 width=4) (actual time=293.046..293.046 rows=84843 loops=3)
+                                            Buckets: 131072  Batches: 2  Memory Usage: 2525kB
+                                            ->  Seq Scan on company_name cn  (cost=0.00..5932.46 rows=84536 width=4) (actual time=7.330..236.085 rows=84843 loops=3)
+                                                  Filter: ((country_code)::text = '[us]'::text)
+                                                  Rows Removed by Filter: 150154
+                                ->  Index Only Scan using name_pkey on name n  (cost=0.43..0.46 rows=1 width=4) (actual time=0.211..0.211 rows=1 loops=285538)
+                                      Index Cond: (id = ci.person_id)
+                                      Heap Fetches: 97220
+                          ->  Index Scan using title_pkey on title t  (cost=0.43..0.45 rows=1 width=21) (actual time=0.474..0.474 rows=1 loops=285538)
+                                Index Cond: (id = ci.movie_id)
+                    ->  Index Scan using person_id_aka_name on aka_name an  (cost=0.42..0.46 rows=2 width=20) (actual time=0.060..0.068 rows=1 loops=285538)
+                          Index Cond: (person_id = ci.person_id)
+Planning time: 466.495 ms
+Execution time: 129802.964 ms

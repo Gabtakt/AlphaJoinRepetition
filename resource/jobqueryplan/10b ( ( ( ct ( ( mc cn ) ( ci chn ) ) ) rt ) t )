@@ -1,0 +1,37 @@
+  ->  Gather  (cost=32139.69..32139.80 rows=1 width=64) (actual time=162092.193..162136.794 rows=2 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        ->  Partial Aggregate  (cost=31139.69..31139.70 rows=1 width=64) (actual time=162072.030..162072.031 rows=1 loops=2)
+              ->  Nested Loop  (cost=20.93..31139.68 rows=1 width=33) (actual time=162072.022..162072.022 rows=0 loops=2)
+                    ->  Nested Loop  (cost=20.78..31139.52 rows=1 width=37) (actual time=162072.020..162072.020 rows=0 loops=2)
+                          ->  Hash Join  (cost=20.35..31138.35 rows=2 width=25) (actual time=162072.015..162072.015 rows=0 loops=2)
+                                Hash Cond: (ci.role_id = rt.id)
+                                ->  Nested Loop  (cost=1.42..31118.64 rows=301 width=29) (actual time=2573.983..162066.844 rows=1307 loops=2)
+                                      Join Filter: (t.id = ci.movie_id)
+                                      ->  Nested Loop  (cost=0.86..30728.61 rows=210 width=29) (actual time=2335.816..35024.223 rows=630 loops=2)
+                                            ->  Nested Loop  (cost=0.43..30020.22 rows=1365 width=8) (actual time=30.169..20241.848 rows=4395 loops=2)
+                                                  ->  Parallel Seq Scan on company_name cn  (cost=0.00..4722.92 rows=123 width=4) (actual time=2.973..199.030 rows=680 loops=2)
+                                                        Filter: ((country_code)::text = '[ru]'::text)
+                                                        Rows Removed by Filter: 116818
+                                                  ->  Index Scan using company_id_movie_companies on movie_companies mc  (cost=0.43..204.36 rows=131 width=12) (actual time=7.651..29.444 rows=6 loops=1361)
+                                                        Index Cond: (company_id = cn.id)
+                                            ->  Index Scan using title_pkey on title t  (cost=0.43..0.52 rows=1 width=21) (actual time=3.361..3.361 rows=0 loops=8790)
+                                                  Index Cond: (id = mc.movie_id)
+                                                  Filter: (production_year > 2010)
+                                                  Rows Removed by Filter: 1
+                                      ->  Index Scan using movie_id_cast_info on cast_info ci  (cost=0.56..1.84 rows=1 width=12) (actual time=110.603..201.810 rows=2 loops=1259)
+                                            Index Cond: (movie_id = mc.movie_id)
+                                            Filter: ((note)::text ~~ '%(producer)%'::text)
+                                            Rows Removed by Filter: 44
+                                ->  Hash  (cost=18.88..18.88 rows=4 width=4) (actual time=3.655..3.655 rows=1 loops=2)
+                                      Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                      ->  Seq Scan on role_type rt  (cost=0.00..18.88 rows=4 width=4) (actual time=3.635..3.638 rows=1 loops=2)
+                                            Filter: ((role)::text = 'actor'::text)
+                                            Rows Removed by Filter: 11
+                          ->  Index Scan using char_name_pkey on char_name chn  (cost=0.43..0.58 rows=1 width=20) (never executed)
+                                Index Cond: (id = ci.person_role_id)
+                    ->  Index Only Scan using company_type_pkey on company_type ct  (cost=0.15..0.17 rows=1 width=4) (never executed)
+                          Index Cond: (id = mc.company_type_id)
+                          Heap Fetches: 0
+Planning time: 402.500 ms
+Execution time: 162137.843 ms

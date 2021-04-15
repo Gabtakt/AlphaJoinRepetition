@@ -1,0 +1,40 @@
+  ->  Gather  (cost=71006.12..71006.33 rows=2 width=96) (actual time=609125.020..609136.727 rows=3 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        ->  Partial Aggregate  (cost=70006.12..70006.13 rows=1 width=96) (actual time=609081.719..609081.720 rows=1 loops=3)
+              ->  Nested Loop  (cost=6.71..70006.05 rows=10 width=63) (actual time=9710.496..609042.382 rows=9358 loops=3)
+                    ->  Nested Loop  (cost=6.28..69988.02 rows=24 width=67) (actual time=5245.153..525228.189 rows=18052 loops=3)
+                          ->  Nested Loop  (cost=5.72..69509.38 rows=20 width=75) (actual time=185.623..96640.888 rows=34172 loops=3)
+                                Join Filter: (mi.movie_id = t.id)
+                                ->  Hash Join  (cost=5.29..69497.57 rows=20 width=54) (actual time=160.427..43127.053 rows=34172 loops=3)
+                                      Hash Cond: (mi.info_type_id = it1.id)
+                                      ->  Nested Loop  (cost=2.86..69489.10 rows=2219 width=58) (actual time=160.234..43084.073 rows=34964 loops=3)
+                                            ->  Hash Join  (cost=2.43..15253.60 rows=5089 width=9) (actual time=0.457..326.866 rows=153308 loops=3)
+                                                  Hash Cond: (mi_idx.info_type_id = it.id)
+                                                  ->  Parallel Seq Scan on movie_info_idx mi_idx  (cost=0.00..13685.15 rows=575015 width=13) (actual time=0.402..127.023 rows=460012 loops=3)
+                                                  ->  Hash  (cost=2.41..2.41 rows=1 width=4) (actual time=0.032..0.032 rows=1 loops=3)
+                                                        Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                        ->  Seq Scan on info_type it  (cost=0.00..2.41 rows=1 width=4) (actual time=0.023..0.026 rows=1 loops=3)
+                                                              Filter: ((info)::text = 'votes'::text)
+                                                              Rows Removed by Filter: 112
+                                            ->  Index Scan using movie_id_movie_info on movie_info mi  (cost=0.43..10.65 rows=1 width=49) (actual time=0.276..0.278 rows=0 loops=459925)
+                                                  Index Cond: (movie_id = mi_idx.movie_id)
+                                                  Filter: ((info)::text = ANY ('{Horror,Action,Sci-Fi,Thriller,Crime,War}'::text[]))
+                                                  Rows Removed by Filter: 15
+                                      ->  Hash  (cost=2.41..2.41 rows=1 width=4) (actual time=0.061..0.061 rows=1 loops=3)
+                                            Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                            ->  Seq Scan on info_type it1  (cost=0.00..2.41 rows=1 width=4) (actual time=0.034..0.050 rows=1 loops=3)
+                                                  Filter: ((info)::text = 'genres'::text)
+                                                  Rows Removed by Filter: 112
+                                ->  Index Scan using title_pkey on title t  (cost=0.43..0.58 rows=1 width=21) (actual time=1.564..1.564 rows=1 loops=102516)
+                                      Index Cond: (id = mi_idx.movie_id)
+                          ->  Index Scan using movie_id_cast_info on cast_info ci  (cost=0.56..23.92 rows=1 width=8) (actual time=11.253..12.541 rows=1 loops=102516)
+                                Index Cond: (movie_id = t.id)
+                                Filter: ((note)::text = ANY ('{(writer),"(head writer)","(written by)",(story),"(story editor)"}'::text[]))
+                                Rows Removed by Filter: 39
+                    ->  Index Scan using name_pkey on name n  (cost=0.43..0.75 rows=1 width=4) (actual time=4.641..4.641 rows=1 loops=54155)
+                          Index Cond: (id = ci.person_id)
+                          Filter: ((gender)::text = 'm'::text)
+                          Rows Removed by Filter: 0
+Planning time: 422.921 ms
+Execution time: 609137.805 ms

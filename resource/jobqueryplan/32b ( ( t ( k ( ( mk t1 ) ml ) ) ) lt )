@@ -1,0 +1,23 @@
+  ->  Nested Loop  (cost=8.09..3819.82 rows=10 width=116) (actual time=78.391..27526.690 rows=4388 loops=1)
+        ->  Nested Loop  (cost=7.66..3775.12 rows=10 width=103) (actual time=59.658..5209.826 rows=4388 loops=1)
+              ->  Nested Loop  (cost=7.23..3770.25 rows=10 width=94) (actual time=43.905..2299.991 rows=4388 loops=1)
+                    ->  Nested Loop  (cost=7.08..3768.56 rows=10 width=16) (actual time=43.469..2266.797 rows=4388 loops=1)
+                          ->  Nested Loop  (cost=6.80..3754.10 rows=34 width=4) (actual time=40.275..2062.821 rows=41840 loops=1)
+                                ->  Seq Scan on keyword k  (cost=0.00..2626.12 rows=1 width=4) (actual time=11.495..88.009 rows=1 loops=1)
+                                      Filter: ((keyword)::text = 'character-name-in-title'::text)
+                                      Rows Removed by Filter: 134169
+                                ->  Bitmap Heap Scan on movie_keyword mk  (cost=6.80..1124.92 rows=305 width=8) (actual time=28.774..1958.456 rows=41840 loops=1)
+                                      Recheck Cond: (keyword_id = k.id)
+                                      Heap Blocks: exact=11541
+                                      ->  Bitmap Index Scan on keyword_id_movie_keyword  (cost=0.00..6.72 rows=305 width=0) (actual time=25.883..25.883 rows=41840 loops=1)
+                                            Index Cond: (keyword_id = k.id)
+                          ->  Index Scan using movie_id_movie_link on movie_link ml  (cost=0.29..0.38 rows=5 width=12) (actual time=0.004..0.004 rows=0 loops=41840)
+                                Index Cond: (movie_id = mk.movie_id)
+                    ->  Index Scan using link_type_pkey on link_type lt  (cost=0.15..0.17 rows=1 width=86) (actual time=0.005..0.005 rows=1 loops=4388)
+                          Index Cond: (id = ml.link_type_id)
+              ->  Index Scan using title_pkey on title t1  (cost=0.43..0.49 rows=1 width=21) (actual time=0.662..0.662 rows=1 loops=4388)
+                    Index Cond: (id = mk.movie_id)
+        ->  Index Scan using title_pkey on title t  (cost=0.43..4.47 rows=1 width=21) (actual time=5.084..5.084 rows=1 loops=4388)
+              Index Cond: (id = ml.linked_movie_id)
+Planning time: 38.470 ms
+Execution time: 27552.612 ms

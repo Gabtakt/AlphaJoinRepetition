@@ -1,0 +1,40 @@
+  ->  Nested Loop  (cost=1002.85..83258.87 rows=1 width=49) (actual time=3544.549..20443.120 rows=121 loops=1)
+        ->  Nested Loop  (cost=1002.43..83258.38 rows=1 width=53) (actual time=3492.430..19792.890 rows=123 loops=1)
+              Join Filter: (ci.movie_id = mc.movie_id)
+              ->  Nested Loop  (cost=1002.00..83257.73 rows=1 width=57) (actual time=3230.952..17795.743 rows=139 loops=1)
+                    ->  Nested Loop  (cost=1001.57..83257.07 rows=1 width=36) (actual time=2560.031..14636.298 rows=387 loops=1)
+                          ->  Gather  (cost=1001.14..83256.41 rows=1 width=24) (actual time=2535.137..12086.698 rows=425 loops=1)
+                                Workers Planned: 2
+                                Workers Launched: 2
+                                ->  Nested Loop  (cost=1.14..82256.31 rows=1 width=24) (actual time=2495.807..17575.646 rows=142 loops=3)
+                                      ->  Nested Loop  (cost=0.99..82252.90 rows=20 width=28) (actual time=2495.348..17574.510 rows=142 loops=3)
+                                            Join Filter: (n.id = ci.person_id)
+                                            ->  Nested Loop  (cost=0.42..82144.14 rows=8 width=24) (actual time=1996.163..9071.138 rows=519 loops=3)
+                                                  ->  Parallel Seq Scan on name n  (cost=0.00..81660.95 rows=39 width=4) (actual time=1958.136..6080.045 rows=2256 loops=3)
+                                                        Filter: (((name)::text ~~ '%Ang%'::text) AND ((gender)::text = 'f'::text))
+                                                        Rows Removed by Filter: 1386908
+                                                  ->  Index Scan using person_id_aka_name on aka_name an  (cost=0.42..12.37 rows=2 width=20) (actual time=1.169..1.324 rows=0 loops=6768)
+                                                        Index Cond: (person_id = n.id)
+                                            ->  Index Scan using person_id_cast_info on cast_info ci  (cost=0.56..13.44 rows=12 width=16) (actual time=15.973..16.371 rows=0 loops=1558)
+                                                  Index Cond: (person_id = an.person_id)
+                                                  Filter: ((note)::text = ANY ('{(voice),"(voice: Japanese version)","(voice) (uncredited)","(voice: English version)"}'::text[]))
+                                                  Rows Removed by Filter: 44
+                                      ->  Index Scan using role_type_pkey on role_type rt  (cost=0.15..0.17 rows=1 width=4) (actual time=0.006..0.006 rows=1 loops=425)
+                                            Index Cond: (id = ci.role_id)
+                                            Filter: ((role)::text = 'actress'::text)
+                          ->  Index Scan using char_name_pkey on char_name chn  (cost=0.43..0.67 rows=1 width=20) (actual time=6.409..6.409 rows=1 loops=425)
+                                Index Cond: (id = ci.person_role_id)
+                    ->  Index Scan using title_pkey on title t  (cost=0.43..0.66 rows=1 width=21) (actual time=8.162..8.162 rows=0 loops=387)
+                          Index Cond: (id = ci.movie_id)
+                          Filter: ((production_year >= 2005) AND (production_year <= 2015))
+                          Rows Removed by Filter: 1
+              ->  Index Scan using movie_id_movie_companies on movie_companies mc  (cost=0.43..0.64 rows=1 width=8) (actual time=12.366..14.365 rows=1 loops=139)
+                    Index Cond: (movie_id = t.id)
+                    Filter: ((note IS NOT NULL) AND (((note)::text ~~ '%(USA)%'::text) OR ((note)::text ~~ '%(worldwide)%'::text)))
+                    Rows Removed by Filter: 5
+        ->  Index Scan using company_name_pkey on company_name cn  (cost=0.42..0.49 rows=1 width=4) (actual time=5.284..5.284 rows=1 loops=123)
+              Index Cond: (id = mc.company_id)
+              Filter: ((country_code)::text = '[us]'::text)
+              Rows Removed by Filter: 0
+Planning time: 544.253 ms
+Execution time: 20619.613 ms

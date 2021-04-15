@@ -1,0 +1,25 @@
+  ->  Nested Loop  (cost=8.22..12426.49 rows=1 width=48) (actual time=9824.880..48738.384 rows=12 loops=1)
+        ->  Nested Loop  (cost=7.79..12426.04 rows=1 width=37) (actual time=4015.434..46367.818 rows=383 loops=1)
+              Join Filter: (t.id = ci.movie_id)
+              ->  Nested Loop  (cost=7.23..12424.05 rows=1 width=41) (actual time=3991.037..44750.667 rows=36 loops=1)
+                    ->  Nested Loop  (cost=6.80..12291.81 rows=270 width=20) (actual time=18.289..15027.738 rows=35548 loops=1)
+                          ->  Seq Scan on keyword k  (cost=0.00..3632.40 rows=8 width=20) (actual time=3.605..82.215 rows=8 loops=1)
+                                Filter: ((keyword)::text = ANY ('{superhero,sequel,second-part,marvel-comics,based-on-comic,tv-special,fight,violence}'::text[]))
+                                Rows Removed by Filter: 134162
+                          ->  Bitmap Heap Scan on movie_keyword mk  (cost=6.80..1079.38 rows=305 width=8) (actual time=22.147..1864.710 rows=4444 loops=8)
+                                Recheck Cond: (keyword_id = k.id)
+                                Heap Blocks: exact=23488
+                                ->  Bitmap Index Scan on keyword_id_movie_keyword  (cost=0.00..6.72 rows=305 width=0) (actual time=18.758..18.758 rows=4444 loops=8)
+                                      Index Cond: (keyword_id = k.id)
+                    ->  Index Scan using title_pkey on title t  (cost=0.43..0.49 rows=1 width=21) (actual time=0.834..0.834 rows=0 loops=35548)
+                          Index Cond: (id = mk.movie_id)
+                          Filter: (production_year > 2014)
+                          Rows Removed by Filter: 1
+              ->  Index Scan using movie_id_cast_info on cast_info ci  (cost=0.56..1.52 rows=37 width=8) (actual time=13.275..44.904 rows=11 loops=36)
+                    Index Cond: (movie_id = mk.movie_id)
+        ->  Index Scan using name_pkey on name n  (cost=0.43..0.46 rows=1 width=19) (actual time=6.187..6.187 rows=0 loops=383)
+              Index Cond: (id = ci.person_id)
+              Filter: ((name)::text ~~ '%Downey%Robert%'::text)
+              Rows Removed by Filter: 1
+Planning time: 449.159 ms
+Execution time: 48740.912 ms

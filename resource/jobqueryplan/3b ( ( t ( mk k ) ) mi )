@@ -1,0 +1,25 @@
+  ->  Gather  (cost=65341.96..65342.17 rows=2 width=32) (actual time=26374.726..26460.049 rows=3 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        ->  Partial Aggregate  (cost=64341.96..64341.97 rows=1 width=32) (actual time=26211.362..26211.362 rows=1 loops=3)
+              ->  Nested Loop  (cost=2643.93..64341.95 rows=3 width=17) (actual time=16927.465..26211.315 rows=2 loops=3)
+                    Join Filter: (t.id = mi.movie_id)
+                    ->  Nested Loop  (cost=2643.49..60218.91 rows=2931 width=25) (actual time=2271.978..13649.506 rows=135 loops=3)
+                          ->  Hash Join  (cost=2643.06..50894.98 rows=19037 width=4) (actual time=61.516..3377.233 rows=4317 loops=3)
+                                Hash Cond: (mk.keyword_id = k.id)
+                                ->  Parallel Seq Scan on movie_keyword mk  (cost=0.00..43303.71 rows=1884971 width=8) (actual time=0.048..3034.457 rows=1507977 loops=3)
+                                ->  Hash  (cost=2626.12..2626.12 rows=1355 width=4) (actual time=60.762..60.762 rows=30 loops=3)
+                                      Buckets: 2048  Batches: 1  Memory Usage: 18kB
+                                      ->  Seq Scan on keyword k  (cost=0.00..2626.12 rows=1355 width=4) (actual time=5.162..60.718 rows=30 loops=3)
+                                            Filter: ((keyword)::text ~~ '%sequel%'::text)
+                                            Rows Removed by Filter: 134140
+                          ->  Index Scan using title_pkey on title t  (cost=0.43..0.49 rows=1 width=21) (actual time=2.378..2.378 rows=0 loops=12951)
+                                Index Cond: (id = mk.movie_id)
+                                Filter: (production_year > 2010)
+                                Rows Removed by Filter: 1
+                    ->  Index Scan using movie_id_movie_info on movie_info mi  (cost=0.43..1.39 rows=1 width=4) (actual time=92.354..93.048 rows=0 loops=405)
+                          Index Cond: (movie_id = mk.movie_id)
+                          Filter: ((info)::text = 'Bulgaria'::text)
+                          Rows Removed by Filter: 63
+Planning time: 239.777 ms
+Execution time: 26461.341 ms

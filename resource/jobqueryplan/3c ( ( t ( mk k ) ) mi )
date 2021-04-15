@@ -1,0 +1,25 @@
+  ->  Gather  (cost=85114.21..85114.42 rows=2 width=32) (actual time=56737.180..56754.955 rows=3 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        ->  Partial Aggregate  (cost=84114.21..84114.22 rows=1 width=32) (actual time=56669.529..56669.529 rows=1 loops=3)
+              ->  Nested Loop  (cost=2643.93..84051.51 rows=25078 width=17) (actual time=264.271..56636.658 rows=2417 loops=3)
+                    Join Filter: (t.id = mi.movie_id)
+                    ->  Nested Loop  (cost=2643.49..60218.91 rows=13173 width=25) (actual time=94.831..13857.517 rows=2625 loops=3)
+                          ->  Hash Join  (cost=2643.06..50894.98 rows=19037 width=4) (actual time=66.446..2446.663 rows=4317 loops=3)
+                                Hash Cond: (mk.keyword_id = k.id)
+                                ->  Parallel Seq Scan on movie_keyword mk  (cost=0.00..43303.71 rows=1884971 width=8) (actual time=0.392..2106.844 rows=1507977 loops=3)
+                                ->  Hash  (cost=2626.12..2626.12 rows=1355 width=4) (actual time=58.523..58.523 rows=30 loops=3)
+                                      Buckets: 2048  Batches: 1  Memory Usage: 18kB
+                                      ->  Seq Scan on keyword k  (cost=0.00..2626.12 rows=1355 width=4) (actual time=5.174..58.475 rows=30 loops=3)
+                                            Filter: ((keyword)::text ~~ '%sequel%'::text)
+                                            Rows Removed by Filter: 134140
+                          ->  Index Scan using title_pkey on title t  (cost=0.43..0.49 rows=1 width=21) (actual time=2.641..2.641 rows=1 loops=12951)
+                                Index Cond: (id = mk.movie_id)
+                                Filter: (production_year > 1990)
+                                Rows Removed by Filter: 0
+                    ->  Index Scan using movie_id_movie_info on movie_info mi  (cost=0.43..1.78 rows=2 width=4) (actual time=14.556..16.296 rows=1 loops=7874)
+                          Index Cond: (movie_id = mk.movie_id)
+                          Filter: ((info)::text = ANY ('{Sweden,Norway,Germany,Denmark,Swedish,Denish,Norwegian,German,USA,American}'::text[]))
+                          Rows Removed by Filter: 35
+Planning time: 239.826 ms
+Execution time: 56756.236 ms
