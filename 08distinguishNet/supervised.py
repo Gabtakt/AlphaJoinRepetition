@@ -22,6 +22,9 @@ class data:
         self.qpopttime = qpopttime
         self.label = label
 
+    def __str__(self):
+        return self.queryname + ',' + str(self.state) + ',' + str(self.label)
+
 
 class supervised:
     def __init__(self, args):
@@ -58,13 +61,12 @@ class supervised:
         for i in range(len(tables)):
             self.table_to_int[tables[i]] = i
 
-        self.datasetnumber = 4 
+        self.datasetnumber = 10
         self.trainList = []
         self.testList = []
 
     def pretreatment(self, path):
         print("Pretreatment running...")
-        start = time.clock()
         # 统一读入数据 随机抽取进行训练
         file_test = open(path)
         line = file_test.readline()
@@ -95,9 +97,12 @@ class supervised:
             for value in listtemp[i]:
                 pickle.dump(value, file)
             file.close()
+        print("Pretreament data done.")
 
-        elapsed = (time.clock() - start)
-        print("Pretreatment time used:", elapsed)
+
+    def printdata(self):
+        for i in self.trainList:
+            print(i)
 
     def supervised(self):
 
