@@ -22,6 +22,15 @@ class data:
         self.qpopttime = qpopttime
         self.label = label
 
+    def __str__(self):
+        print('query name: ' + self.queryname)
+        print('state: ' + str(self.state))
+        print('origintime: ' + str(self.origintime))
+        print('neotime: ' + str(self.neotime))
+        print('qpopttime: ' + str(self.qpopttime))
+        print('label: ' + str(self.label))
+        return ''
+
 
 class supervised:
     def __init__(self, args):
@@ -58,13 +67,12 @@ class supervised:
         for i in range(len(tables)):
             self.table_to_int[tables[i]] = i
 
-        self.datasetnumber = 4 
+        self.datasetnumber = 10 
         self.trainList = []
         self.testList = []
 
     def pretreatment(self, path):
         print("Pretreatment running...")
-        start = time.clock()
         # 统一读入数据 随机抽取进行训练
         file_test = open(path)
         line = file_test.readline()
@@ -95,9 +103,12 @@ class supervised:
             for value in listtemp[i]:
                 pickle.dump(value, file)
             file.close()
+        print('Pretreatment done.')
 
-        elapsed = (time.clock() - start)
-        print("Pretreatment time used:", elapsed)
+    def printdata(self):
+        for a in self.trainList:
+            print(a)
+
 
     def supervised(self):
 
@@ -112,7 +123,6 @@ class supervised:
         loss1000 = 0
         count = 0
 
-        # starttime = datetime.now()
         for step in range(1, 300001):
             index = random.randint(0, len(self.trainList) - 1)
             state = self.trainList[index].state
@@ -128,50 +138,53 @@ class supervised:
             loss.backward()  # 计算梯度
             optim.step()  # 应用梯度，并更新参数
             loss1000 += loss.item()
+
+            if step % 100000 == 0:
+                torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised-{:d}-{:.3f}.pt'.format(count, loss1000))
+                count = count + 1
+                # self.test_network()
             if step % 1000 == 0:
                 print('[{}]  Epoch: {}, Loss: {:.5f}'.format(datetime.now(), step, loss1000))
                 loss1000 = 0
-            # if step % 2000000 == 0:
-            #     torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised.pt')
-            #     self.test_network()
-        torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised.pt')
+        # torch.save(self.actor_net.state_dict(), self.args.save_dir + 'supervised.pt')
 
     # functions to test the network
     def test_network(self):
         self.load_data()
-        model_path = self.args.save_dir + 'supervised.pt'
+        model_path = self.args.save_dir + 'supervised-0-132.531.pt'
         self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
         self.actor_net.eval()
 
         # 测试集
         correct = 0
-        for step in range(self.testList.__len__()):
-            state = self.testList[step].state
-            state_tensor = torch.tensor(state, dtype=torch.float32)
+        with torch.no_grad():
+            for step in range(self.testList.__len__()):
+                state = self.testList[step].state
+                state_tensor = torch.tensor(state, dtype=torch.float32)
 
-            prediction = self.actor_net(state_tensor).detach().cpu().numpy()
-            maxindex = np.argmax(prediction)
-            print(self.testList[step].queryname, ",", self.testList[step].origintime, ",",
-                  self.testList[step].neotime, ",", self.testList[step].qpopttime, ",",
-                  self.testList[step].label, ",", maxindex)
-            if maxindex == self.testList[step].label:
-                correct += 1
-        print("测试集：", correct, "\t", self.testList.__len__())
+                prediction = self.actor_net(state_tensor).detach().cpu().numpy()
+                maxindex = np.argmax(prediction)
+                print(self.testList[step].queryname, ",", self.testList[step].origintime, ",",
+                        self.testList[step].neotime, ",", self.testList[step].qpopttime, ",",
+                        self.testList[step].label, ",", maxindex)
+                if maxindex == self.testList[step].label:
+                    correct += 1
+            print("测试集：", correct, "\t", self.testList.__len__())
 
-        # 训练集
-        correct1 = 0
-        for step in range(self.trainList.__len__()):
-            state = self.trainList[step].state
-            state_tensor = torch.tensor(state, dtype=torch.float32)
+            # 训练集
+            correct1 = 0
+            for step in range(self.trainList.__len__()):
+                state = self.trainList[step].state
+                state_tensor = torch.tensor(state, dtype=torch.float32)
 
-            predictionRuntime = self.actor_net(state_tensor)
-            prediction = predictionRuntime.detach().cpu().numpy()
-            maxindex = np.argmax(prediction)
-            label = self.trainList[step].label
-            # print(self.trainList[step].queryname.strip(), "\t", label, "\t", maxindex)
-            if maxindex == label:
-                correct1 += 1
-        print("训练集", correct1, "\t", self.trainList.__len__())
+                predictionRuntime = self.actor_net(state_tensor)
+                prediction = predictionRuntime.detach().cpu().numpy()
+                maxindex = np.argmax(prediction)
+                label = self.trainList[step].label
+                # print(self.trainList[step].queryname.strip(), "\t", label, "\t", maxindex)
+                if maxindex == label:
+                    correct1 += 1
+            print("训练集", correct1, "\t", self.trainList.__len__())
 
     def load_data(self, testnum=0):
         if self.trainList.__len__() != 0:

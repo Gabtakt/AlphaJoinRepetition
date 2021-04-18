@@ -28,7 +28,6 @@ WHERE cn.country_code = '[us]'
   AND mi_idx.movie_id = mc.movie_id;
 
 
-
 Finalize Aggregate  (cost=20721.17..20721.18 rows=1 width=96)
   ->  Gather  (cost=20720.94..20721.15 rows=2 width=96)
         Workers Planned: 2

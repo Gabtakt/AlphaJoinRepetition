@@ -39,7 +39,6 @@ WHERE it1.info = 'countries'
   AND it.id = mi_idx.info_type_id;
 
 
-
 Aggregate  (cost=7436.87..7436.88 rows=1 width=64)
   ->  Nested Loop  (cost=8.07..7436.86 rows=1 width=22)
         Join Filter: (mi.info_type_id = it1.id)

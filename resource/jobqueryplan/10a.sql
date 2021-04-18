@@ -21,7 +21,6 @@ WHERE ci.note LIKE '%(voice)%'
   AND ct.id = mc.company_type_id;
 
 
-
 Finalize Aggregate  (cost=46752.12..46752.13 rows=1 width=64)
   ->  Gather  (cost=46751.90..46752.11 rows=2 width=64)
         Workers Planned: 2

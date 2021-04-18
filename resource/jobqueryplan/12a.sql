@@ -29,7 +29,6 @@ WHERE cn.country_code = '[us]'
   AND mi.movie_id = mi_idx.movie_id;
 
 
-
 Aggregate  (cost=16826.54..16826.55 rows=1 width=96)
   ->  Gather  (cost=1005.35..16826.53 rows=1 width=41)
         Workers Planned: 2

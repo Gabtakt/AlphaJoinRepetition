@@ -19,7 +19,6 @@ WHERE cn.country_code = '[us]'
   AND mc.movie_id = mk.movie_id;
 
 
-
 Aggregate  (cost=4574.68..4574.69 rows=1 width=32)
   ->  Nested Loop  (cost=9.06..4571.45 rows=1295 width=15)
         ->  Nested Loop  (cost=8.63..3982.35 rows=1295 width=4)

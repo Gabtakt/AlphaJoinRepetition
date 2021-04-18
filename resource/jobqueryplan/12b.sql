@@ -8,7 +8,7 @@ FROM company_name AS cn,
      movie_info AS mi,
      movie_info_idx AS mi_idx,
      title AS t
-WHERE cn.country_code ='[us]'
+WHERE cn.country_code = '[us]'
   AND ct.kind IS NOT NULL
   AND (ct.kind = 'production companies'
        OR ct.kind = 'distributors')
@@ -27,7 +27,6 @@ WHERE cn.country_code ='[us]'
   AND mc.movie_id = mi.movie_id
   AND mc.movie_id = mi_idx.movie_id
   AND mi.movie_id = mi_idx.movie_id;
-
 
 
 Aggregate  (cost=19208.40..19208.41 rows=1 width=64)

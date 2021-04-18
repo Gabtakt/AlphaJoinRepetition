@@ -32,7 +32,6 @@ WHERE cn.country_code = '[us]'
   AND ct.id = mc.company_type_id;
 
 
-
 Finalize Aggregate  (cost=271195.20..271195.21 rows=1 width=64)
   ->  Gather  (cost=271194.98..271195.19 rows=2 width=64)
         Workers Planned: 2

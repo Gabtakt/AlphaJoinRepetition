@@ -23,7 +23,6 @@ WHERE cn.country_code = '[us]'
   AND mc.movie_id = mk.movie_id;
 
 
-
 Aggregate  (cost=5216.57..5216.58 rows=1 width=64)
   ->  Nested Loop  (cost=9.48..5201.50 rows=3013 width=33)
         Join Filter: (n.id = an.person_id)

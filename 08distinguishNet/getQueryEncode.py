@@ -642,7 +642,7 @@ def numstrList2numList(res):
     return res
 
 if __name__ == '__main__':
-    # getResource()
+    getResource()
     attrNames = getQueryAttributions()
     getQueryEncode(attrNames)
 

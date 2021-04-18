@@ -20,7 +20,6 @@ WHERE ci.note LIKE '%(producer)%'
   AND ct.id = mc.company_type_id;
 
 
-
 Finalize Aggregate  (cost=43609.16..43609.17 rows=1 width=64)
   ->  Gather  (cost=43608.94..43609.15 rows=2 width=64)
         Workers Planned: 2

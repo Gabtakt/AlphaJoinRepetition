@@ -25,7 +25,6 @@ WHERE ci.note IN ('(producer)',
   AND it.id = mi_idx.info_type_id;
 
 
-
 Aggregate  (cost=116163.51..116163.52 rows=1 width=96)
   ->  Nested Loop  (cost=1006.71..116163.50 rows=1 width=65)
         ->  Gather  (cost=1006.28..116163.04 rows=1 width=60)

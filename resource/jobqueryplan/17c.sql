@@ -20,7 +20,6 @@ WHERE k.keyword = 'character-name-in-title'
   AND mc.movie_id = mk.movie_id;
 
 
-
 Aggregate  (cost=4404.34..4404.35 rows=1 width=64)
   ->  Nested Loop  (cost=9.06..4404.34 rows=1 width=15)
         ->  Nested Loop  (cost=8.63..4403.88 rows=1 width=27)
