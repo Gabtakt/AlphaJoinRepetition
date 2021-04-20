@@ -39,9 +39,9 @@ def runSqlPlan():
             cur.execute(statement)
             plan_time2=float(cur.fetchall()[-1][-1].split(' ')[-2])
             plan_time=plan_time1+plan_time2
-            s=" ".join([query_name,query_plan,str(plan_time1),str(plan_time2),str(plan_time),str(datetime.datetime.now()),"\n"])
-            #s=query_name+" "+query_plan+" "+str(plan_time1)+" "+ str(plan_time2)+" "+ str(plan_time)+" "+str(datetime.datetime.now())
-            file_output.write(s)
+            msg = (query_name + ',' + query_plan + ',' + str(plan_time1) + ',' + str(plan_time2) 
+            + ',' + str(plan_time) + ',' + str(datetime.datetime.now()) + "\n")
+            file_output.write(msg)
             file_output.flush()
     file_output.close()
 

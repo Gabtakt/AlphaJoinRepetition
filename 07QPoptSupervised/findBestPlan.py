@@ -146,7 +146,7 @@ def findBestPlan():
     queryNameList = os.listdir(tablenamedir)
     queryNameList.sort()
 
-    searchtime = 0
+    searchtime = 5
     for i in range(5) :
         searchtime += 5 # 搜索因子
         print(searchtime)

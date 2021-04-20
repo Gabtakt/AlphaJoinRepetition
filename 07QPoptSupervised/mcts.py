@@ -8,7 +8,7 @@ from copy import deepcopy
 import numpy as np
 from models import ValueNet
 import torch
-model_path = './saved_models/supervised15-569.90684.pt'
+model_path = './saved_models/supervised.pt'
 
 # 加载预先训练好的价值网络
 predictionNet = ValueNet(856, 5)

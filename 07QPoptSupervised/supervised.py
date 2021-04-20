@@ -158,9 +158,9 @@ class supervised:
         optim = torch.optim.SGD(self.actor_net.parameters(), lr=self.args.critic_lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, mode = 'min', 
         verbose = True, patience = 20, factor = 0.5, min_lr = 0.001)
-        # loss_func = torch.nn.CrossEntropyLoss()
+        loss_func = torch.nn.CrossEntropyLoss()
         # loss_func = torch.nn.BCEWithLogitsLoss()
-        loss_func = torch.nn.MSELoss()
+        # loss_func = torch.nn.MSELoss()
         # loss_func = torch.nn.NLLLoss()
 
         loss1000 = 0
@@ -173,14 +173,14 @@ class supervised:
 
             predictionRuntime = self.actor_net(state_tensor) # 网络预测输出
 
-            temp = [0 for i in range(self.num_output)]
-            temp[self.dataList[index].label] = 1
-            label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
+            # temp = [0 for i in range(self.num_output)]
+            # temp[self.dataList[index].label] = 1
+            # label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
 
-            # temp = [self.dataList[index].label]
-            # label_tensor = torch.tensor(temp, dtype=torch.float32)
+            temp = [self.dataList[index].label]
+            label_tensor = torch.tensor(temp, dtype=torch.long)
 
-            loss = loss_func(predictionRuntime, label_tensor)
+            loss = loss_func(predictionRuntime.view(1,5), label_tensor)
 
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
