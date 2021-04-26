@@ -8,10 +8,10 @@ from copy import deepcopy
 import numpy as np
 from models import ValueNet
 import torch
-model_path = './saved_models/supervised.pt'
+model_path = './sp.pt'
 
 # 加载预先训练好的价值网络
-predictionNet = ValueNet(856, 5)
+predictionNet = ValueNet(856, 1)
 predictionNet.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 predictionNet.eval()
 
@@ -24,9 +24,10 @@ def getReward(state):
     with torch.no_grad():
         predictionRuntime = predictionNet(inputState)
     prediction = predictionRuntime.detach().cpu().numpy()
-    maxindex = np.argmax(prediction)
-    # FIXME:这里为什么是用10减而不是5减
-    reward = 10 - maxindex
+    # maxindex = np.argmax(prediction)
+    # # FIXME:这里为什么是用10减而不是5减
+    # reward = （4 - maxindex) / 4
+    reward = 1 - prediction
     return reward
 
 

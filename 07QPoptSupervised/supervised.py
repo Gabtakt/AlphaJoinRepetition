@@ -15,10 +15,12 @@ class data:
         self.state = state
         self.time = time
         self.label = 0
+        self.maxtime = 0
 
 class supervised:
     def __init__(self, args):
-        self.num_inputs = 856  # 预测网络输入的向量的维度
+        self.num_inputs = 784 + 72  # 预测网络输入的向量的维度
+        # self.num_inputs = 784  # 预测网络输入的向量的维度
         self.num_output = 5  # 网络输出的向量的维度
         self.args = args
         self.right = 0
@@ -109,6 +111,9 @@ class supervised:
         return matrix
 
     def pretreatment(self, path):
+
+        maxtime = 0
+
         # 统一读入数据 随机抽取进行训练
         file_test = open(path)
         line = file_test.readline()
@@ -122,14 +127,23 @@ class supervised:
             state = predicatesEncode + state
             runtime = line.split(",")[2].strip()
             if runtime == 'timeout':  # 5 min = 300 s = 300 000 ms
-                runtime = 9000000
+                runtime = 300000
             else:
                 runtime = int(float(runtime))
+
+            if runtime > maxtime:
+                maxtime = runtime
+
             temp = data(state, runtime)
             self.dataList.append(temp)
             line = file_test.readline()
 
         self.dataList.sort(key=lambda x: x.time, reverse=False)
+
+        for i in range(self.dataList.__len__()):
+            self.dataList[i].time = self.dataList[i].time / maxtime
+            self.dataList[i].maxtime = maxtime
+
         for i in range(self.dataList.__len__()):
             self.dataList[i].label = int(i / (self.dataList.__len__() / self.num_output + 1))
             print(self.dataList[i].label)
@@ -157,16 +171,16 @@ class supervised:
         self.load_data()
         optim = torch.optim.SGD(self.actor_net.parameters(), lr=self.args.critic_lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, mode = 'min', 
-        verbose = True, patience = 20, factor = 0.5, min_lr = 0.001)
-        loss_func = torch.nn.CrossEntropyLoss()
+        verbose = True, patience = 20, factor = 0.5, min_lr = 1e-4)
+        # loss_func = torch.nn.CrossEntropyLoss()
         # loss_func = torch.nn.BCEWithLogitsLoss()
-        # loss_func = torch.nn.MSELoss()
+        loss_func = torch.nn.MSELoss(reduction='sum')
         # loss_func = torch.nn.NLLLoss()
 
         loss1000 = 0
         count = 0
 
-        for step in range(1, 5000001):
+        for step in range(1, 3000001):
             index = random.randint(0, len(self.dataList) - 1)
             state = self.dataList[index].state
             state_tensor = torch.tensor(state, dtype=torch.float32)
@@ -177,10 +191,14 @@ class supervised:
             # temp[self.dataList[index].label] = 1
             # label_tensor = torch.tensor(temp, dtype=torch.float32) # 目标
 
-            temp = [self.dataList[index].label]
-            label_tensor = torch.tensor(temp, dtype=torch.long)
+            # temp = [self.dataList[index].label]
+            # label_tensor = torch.tensor(temp, dtype=torch.long)
 
-            loss = loss_func(predictionRuntime.view(1,5), label_tensor)
+            # loss = loss_func(predictionRuntime.view(1,5), label_tensor)
+            targetruntime = self.dataList[index].time
+            target_tensor = torch.tensor(targetruntime, dtype = torch.float32)
+            # print(predictionRuntime,target_tensor)
+            loss = loss_func(predictionRuntime, target_tensor)
 
             optim.zero_grad()  # 清空梯度
             loss.backward()  # 计算梯度
@@ -199,10 +217,10 @@ class supervised:
 
     # functions to test the network
     def test_network(self):
-        # self.load_data()
-        # model_path = self.args.save_dir + 'supervised.pt'
-        # self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-        # self.actor_net.eval()
+        self.load_data()
+        model_path = self.args.save_dir + 'supervised7-59.01149.pt'
+        self.actor_net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
+        self.actor_net.eval()
         with torch.no_grad():
             correct = 0
             for step in range(self.testList.__len__()):
@@ -211,11 +229,14 @@ class supervised:
 
                 predictionRuntime = self.actor_net(state_tensor)
                 prediction = predictionRuntime.detach().cpu().numpy()
-                maxindex = np.argmax(prediction)
-                label = self.testList[step].label
-                if maxindex == label:
-                    correct += 1
-            print(correct, self.testList.__len__(), correct/self.testList.__len__(), end=' ')
+                correct += ((prediction * self.testList[step].maxtime - self.testList[step].time) ** 2) ** 0.5
+            #     maxindex = np.argmax(prediction)
+            #     label = self.testList[step].label
+            #     if maxindex == label:
+            #         correct += 1
+            # print(correct, self.testList.__len__(), correct/self.testList.__len__(), end=' ')
+            print(correct / self.testList.__len__(), self.testList.__len__(), end=' ')
+
 
             correct1 = 0
             for step in range(self.dataList.__len__()):
@@ -224,13 +245,17 @@ class supervised:
 
                 predictionRuntime = self.actor_net(state_tensor)
                 prediction = predictionRuntime.detach().cpu().numpy()
-                maxindex = np.argmax(prediction)
-                label = self.dataList[step].label
-                if maxindex == label:
-                    correct1 += 1
-            print(correct1, self.dataList.__len__(), correct1/self.dataList.__len__())
+                # maxindex = np.argmax(prediction)
+                # label = self.dataList[step].label
+                # if maxindex == label:
+                #     correct1 += 1
 
-            self.right = correct / self.testList.__len__()
+                predictionRuntime = self.actor_net(state_tensor)
+                prediction = predictionRuntime.detach().cpu().numpy()
+                correct1 += ((prediction * self.dataList[step].maxtime - self.dataList[step].time) ** 2) ** 0.5
+            # print(correct1, self.dataList.__len__(), correct1/self.dataList.__len__())
+            print(correct1 / self.dataList.__len__(), self.dataList.__len__())
+            # self.right = correct / self.testList.__len__()
 
 
     def test_hintcost(self, queryName, hint):

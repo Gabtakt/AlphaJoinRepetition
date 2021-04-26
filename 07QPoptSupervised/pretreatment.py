@@ -9,7 +9,5 @@ if __name__ == '__main__':
     ddpg_trainer = supervised(args)
 
     print("Pretreatment running...")
-    start = time.clock()
     ddpg_trainer.pretreatment("./data/t6.sql")
-    elapsed = (time.clock() - start)
-    print("Pretreatment time used:", elapsed)
+    print("Pretreatment done")

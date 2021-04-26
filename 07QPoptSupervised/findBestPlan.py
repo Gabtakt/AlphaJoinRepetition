@@ -164,12 +164,12 @@ def findBestPlan():
                                     predicatesEncodeDict[queryName])
             currentState = initialState
             start = time.time()
-            start2 = time.clock()
+            start2 = time.perf_counter()
             while currentState.currentStep != 1:
                 action = mct.search(initialState=currentState)
                 currentState = currentState.takeAction(action)
             elapsed = (time.time() - start) * 1000
-            elapsed2  = (time.clock() - start2) * 1000 / 96 
+            elapsed2  = (time.perf_counter() - start2) * 1000 / 96 
             hint = decode(currentState, tableList)
 
             print(queryName, ",", hint, ",%.3f" % elapsed, ",%.3f" % elapsed2)
