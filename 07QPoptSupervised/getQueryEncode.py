@@ -401,8 +401,7 @@ def getQueryEncode(attrNames):
             i = i + 1
 
         predicatesEncodeDict[queryName[:-4]] = predicatesEncode
-        # queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
-        queryEncodeDict[queryName[:-4]] = joinEncode
+        queryEncodeDict[queryName[:-4]] = joinEncode + predicatesEncode
 
     f = open(predicatesEncodeDictpath, 'w')
     f.write(str(predicatesEncodeDict))
